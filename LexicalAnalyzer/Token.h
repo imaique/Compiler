@@ -1,10 +1,12 @@
 #pragma once
 #include <string>
+#include <unordered_map>
 
 class Token {
 	std::string lexeme;
 	int line_location;
-
+public:
+	
 	enum class Type {
 		IntegerNumber,
 		ID,
@@ -52,10 +54,10 @@ class Token {
 		Function,
 		Public,
 		Private,
+		InvalidCharacter,
 	};
 
-	std::string token_type_to_string(Type type);
+	static const std::unordered_map<std::string, Type> reserved_word_to_token_type;
 
-	
-	
+	std::string token_type_to_string(Type type);
 };
