@@ -13,26 +13,31 @@ public:
 };
 
 class State {
+	static std::unordered_map<int, State*> state_map;
 protected:
-	static State* initial_state;
-	static State* error_state;
-	State* unsupported_character_transition;
+	int unsupported_transition;
+	State();
+	State(int unsupported_transition);
+public:
+	static State* get_state(int);
+	//static void set_state_map(std::unordered_map<int, State*>);
+	
 	const bool is_final_state = false;
-
 	virtual Response get_next_state(char) = 0;
 };
 
 class LetterState: virtual public State {
-	State* letter_transition;
+	int letter_transition;
 public:
-	LetterState(State*);
+	LetterState(int);
 	Response get_next_state(char);
 };
 
 class DigitState : virtual public State {
-	State* digit_transition;
+	int digit_transition;
+	int zero_transition;
 public:
-	DigitState(State*);
+	DigitState(int digit_transition, int zero_transition, int unsupported_transition);
 	Response get_next_state(char);
 };
 
@@ -45,7 +50,7 @@ public:
 };
 
 class BlockCommentState : virtual public State {
-	State* after_comment_transition;
+	int after_comment_transition;
 	int counter = 1;
 	char previous_character = 'a';
 public:
@@ -60,7 +65,7 @@ public:
 };
 
 class CharacterState : virtual public State {
-	const std::unordered_map<char, State*> valid_transitions;
+	const std::unordered_map<char, int> valid_transitions;
 public:
 	Response get_next_state(char);
 };
