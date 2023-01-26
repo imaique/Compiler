@@ -1,68 +1,38 @@
 #include "LexicalAnalyzer.h"
 
 typedef std::string string;
+typedef Token::Type TT;
 
-void LexicalAnalyzer::valid_state(int state) {
-	this->state = state;
-	index++;
+LexicalAnalyzer::LexicalAnalyzer(string s) {
+	file.open(s);
+
+	construct_states();
 }
 
-/*
-const std::unordered_map<char, MapOrToken> LexicalAnalyzer::valid_delimiters = 
-{'=','<', '>',};
-*/
+void LexicalAnalyzer::construct_states() {
+	std::unordered_map<int, State*> state_map{
+		{6, new DigitState(6,6,7)},
+		{7, new FinalState(TT::IntegerNumber)}
+	};
 
-bool LexicalAnalyzer::is_delimiter(char c) {
-	return valid_delimiters.find(c) != valid_delimiters.end();
 }
+
 Token LexicalAnalyzer::get_next_token() {
 	// trim start whitespace
 	while (index < line.size() && line[index] == ' ') index++;
 
 	int start = index;
 
-	while (index < line.size() && !is_delimiter(line[index])) index++;
-
-	// currently a delimiter, operator, punctuation etc..
-	if (index == start) {
-
-	}
-	// id, integer, float or reserved word
-	else {
-		string lexeme = line.substr(start, index - start);
-
-		// has to be integer or float
-		if (isdigit(lexeme[0])) {
-
-		}
-		// has to be id or reserved word
-		
-		else {
-
-		}
-	}
-
-	/*
-	while (true) {
+	while (!state->is_final_state) {
 		char c = line[index];
-		switch (state) {
-		case 1:
-			while (index < line.size() && c == ' ') index++;
-			if (isalpha(c)) {
-				valid_state(2);
-			}
-			else if (isdigit(c)) {
-				valid_state(4);
-			}
-			else {
-				std::unordered_map<char, int>  map { {'/', 4}};
-				
-			}
-			break;
-		}
+		Response response = state->get_next_state(c);
+		if (response.consume) index++;
+		state = response.nextState;
 	}
-	*/
-	
+
+	FinalState* final_state = dynamic_cast<FinalState*>(state);
+
+	return Token();
 }
 bool LexicalAnalyzer::has_next_token() {
 	if (line[index] == '\n') index++;
