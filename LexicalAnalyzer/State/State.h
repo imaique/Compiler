@@ -52,6 +52,13 @@ public:
 	Response get_next_state(char);
 };
 
+class CompositeState : virtual public State {
+	std::vector<State> states;
+public:
+	CompositeState(int unsupported_transition, std::vector<State> states);
+	Response get_next_state(char);
+};
+
 class CharacterState : virtual public State {
 	const std::unordered_map<char, State*> valid_transitions;
 public:
