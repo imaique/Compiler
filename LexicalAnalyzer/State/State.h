@@ -43,9 +43,10 @@ public:
 };
 
 class FinalState : virtual public State {
-	const bool is_final_state = true;
 	const Token::Type token_type;
 public:
+	const bool is_final_state = true;
+	FinalState(Token::Type token_type);
 	Response get_next_state(char);
 	Token::Type get_token_type();
 };
