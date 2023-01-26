@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include "../Token.h"
 
+class State;
+
 struct Response {
 public:
 	Response(bool, State*);
