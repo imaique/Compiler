@@ -99,6 +99,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="driver.cpp" />
+    <ClCompile Include="LexicalAnalyzer\LexicalAnalyzer.cpp" />
+    <ClCompile Include="LexicalAnalyzer\State\State.cpp" />
+    <ClCompile Include="LexicalAnalyzer\Token.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LexicalAnalyzer\LexicalAnalyzer.h" />
+    <ClInclude Include="LexicalAnalyzer\State\State.h" />
+    <ClInclude Include="LexicalAnalyzer\Token.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
