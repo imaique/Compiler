@@ -9,7 +9,7 @@ struct Response {
 public:
 	Response(bool, State*);
 	const bool consume;
-	const State* nextState;
+	State* const nextState;
 };
 
 class State {
