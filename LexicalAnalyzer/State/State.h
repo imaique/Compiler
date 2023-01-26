@@ -7,6 +7,7 @@ class State;
 
 struct Response {
 public:
+	Response(bool, int);
 	Response(bool, State*);
 	const bool consume;
 	State* const nextState;
