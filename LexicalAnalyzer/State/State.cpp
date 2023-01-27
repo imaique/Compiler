@@ -45,7 +45,7 @@ DigitState::DigitState(int digit_transition, int zero_transition, int unsupporte
 	: digit_transition(digit_transition), zero_transition(zero_transition), State(unsupported_transition) {};
 
 Response DigitState::get_next_state(char c) {
-	if (isdigit(c)) return r{ true, digit_transition };
+	if (isdigit(c)) return r{ true, c == '0' ? zero_transition : digit_transition};
 	else return r{ false, unsupported_transition };;
 }
 
