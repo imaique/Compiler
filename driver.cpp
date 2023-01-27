@@ -3,15 +3,14 @@
 
 #include "LexicalAnalyzer/LexicalAnalyzer.h"
 
+
 int main() {
-	State* state = new FinalState(Token::Type::AND);
-	std::cout << state->is_final_state;
-	
-	LexicalAnalyzer LA = LexicalAnalyzer("lexpositivegrading");
-	while (LA.has_next_token()) {
-		Token token = LA.get_next_token();
-		std::cout << token;
+	std::vector<std::string> test_files{ "lexpositivegrading" , "lexnegativegrading", "example-polynomial", "example-bubblesort"};
+
+	for (auto filename : test_files) {
+		LexicalAnalyzer positive = LexicalAnalyzer(filename);
+		while (positive.has_next_token()) {
+			Token token = positive.get_next_token();
+		}
 	}
-	std::cin.get();
-	
 }
