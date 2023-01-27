@@ -1,4 +1,5 @@
 #include "LexicalAnalyzer.h"
+#include <sstream>
 
 typedef std::string string;
 typedef Token::Type TT;
@@ -7,6 +8,10 @@ LexicalAnalyzer::LexicalAnalyzer(string filename) {
 	token_file.open(filename + ".outlextokens");
 	error_file.open(filename + ".outlexerrors");
 	input_file.open(filename + ".src");
+
+	index = 0;
+	line_number = 1;
+	std::getline(input_file, line);
 
 	construct_states();
 }
@@ -22,7 +27,7 @@ void LexicalAnalyzer::construct_states() {
 
 
 	std::unordered_map<int, State*> state_map{
-		{1, new CompositeState({new LetterState(3), new DigitState(5, 7)}, INVALIDCHAR, true)},
+		{1, new CompositeState({new LetterState(3), new DigitState(5, 7), new CharacterState({{'/', 16}})}, INVALIDCHAR, true)},
 		{3, new CompositeState({new LetterState(3), new DigitState(3, 3), new CharacterState({{'_', 3}})}, ID)},
 		{5, new CompositeState({new DigitState(5, 5), new CharacterState({{'.',8}})}, INTNUM)},
 		{7, new CharacterState({{'.', 8}}, INTNUM)},
