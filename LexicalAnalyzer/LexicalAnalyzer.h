@@ -20,6 +20,7 @@ class LexicalAnalyzer {
 	std::ofstream error_file;
 	std::ifstream input_file;
 	void valid_state(int);
+	void increment_line();
 public:
 	LexicalAnalyzer(std::string);
 
