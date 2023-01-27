@@ -54,6 +54,8 @@ public:
 		Function,
 		Public,
 		Private,
+		LineComment,
+		BlockComment,
 		InvalidCharacter,
 	};
 

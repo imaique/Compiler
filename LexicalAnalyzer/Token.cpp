@@ -9,6 +9,14 @@ Token::Token(std::string lexeme, int line_location, Type token_type)
 
 std::string Token::get_string(Type type) { return token_type_to_string.at(type); }
 
+T Token::get_reserved_type(std::string lexeme) {
+	return reserved_word_to_token_type.at(lexeme);
+}
+
+bool Token::is_reserved_word(std::string lexeme) {
+	return reserved_word_to_token_type.find(lexeme) != reserved_word_to_token_type.end();
+}
+
 const std::unordered_map<Token::Type, std::string> Token::token_type_to_string = {
 		{T::IntegerNumber, "intnum"},
 		{T::ID, "id"},
@@ -28,40 +36,40 @@ const std::unordered_map<Token::Type, std::string> Token::token_type_to_string =
 		{T::OpenParenthesis, "openpar"},
 		{T::ClosedParenthesis, "closepar"},
 		{T::OpenCurlyBracket, "opencubr"},
-		/*
-		{T::ClosedCurlyBracket,
-		{T::OpenSquareBracket,
-		{T::ClosedSquareBracket,
-		{T::SemiColon,
-		{T::Comma,
-		{T::Point,
-		{T::Colon,
-		{T::ReturnType,
-		{T::ScopeOperator,
-		{T::OR,
-		{T::AND,
-		{T::NOT,
-		{T::Integer,
-		{T::Float,
-		{T::Void,
-		{T::Class,
-		{T::Self,
-		{T::Isa,
-		{T::While,
-		{T::If,
-		{T::Then,
-		{T::Else,
-		{T::Read,
-		{T::Write,
-		{T::Return,
-		{T::LocalVar,
-		{T::Constructor,
-		{T::Attribute,
-		{T::Function,
-		{T::Public,
-		{T::Private,
-		{T::InvalidCharacter,
-		*/
+		{T::ClosedCurlyBracket, "closecubr"},
+		{T::OpenSquareBracket, "opensqbr"},
+		{T::ClosedSquareBracket, "closesqbr"},
+		{T::SemiColon, "semi"},
+		{T::Comma, "comma"},
+		{T::Point, "dot"},
+		{T::Colon, "closecubr"},
+		{T::ReturnType, "returntype"},
+		{T::ScopeOperator, "scopeop"},
+		{T::OR, "or"},
+		{T::AND, "and"},
+		{T::NOT, "not"},
+		{T::Integer, "integer"},
+		{T::Float, "float"},
+		{T::Void, "void"},
+		{T::Class, "class"},
+		{T::Self, "self"},
+		{T::Isa, "isa"},
+		{T::While, "while"},
+		{T::If, "if"},
+		{T::Then, "then"},
+		{T::Else, "else"},
+		{T::Read, "read"},
+		{T::Write, "write"},
+		{T::Return, "return"},
+		{T::LocalVar, "localvar"},
+		{T::Constructor, "constructor"},
+		{T::Attribute, "attribute"},
+		{T::Function, "function"},
+		{T::Public, "public"},
+		{T::Private, "private"},
+		{T::LineComment, "inlinecmt"},
+		{T::BlockComment, "blockcmt"},
+		{T::InvalidCharacter, "invalidchar"},
 };
 
 const std::unordered_map<std::string, Token::Type> Token::reserved_word_to_token_type = {
