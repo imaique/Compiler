@@ -17,14 +17,25 @@ void LexicalAnalyzer::construct_states() {
 	const int ID = 4;
 	const int INVALIDNUM = 404;
 	const int INVALIDCHAR = 405;
+	const int DIVIDE = 300;
+
+
+
 	std::unordered_map<int, State*> state_map{
-		{1, new CompositeState({new LetterState(2), new DigitState(5, 7)}, INVALIDCHAR)},
-		{2, new CompositeState({new LetterState(3), new DigitState(3, 3)}, ID)},
-		{3, new CompositeState({new LetterState(3)}, ID)},
+		{1, new CompositeState({new LetterState(3), new DigitState(5, 7)}, INVALIDCHAR)},
+		{3, new CompositeState({new LetterState(3), new DigitState(3, 3), new CharacterState({{'_', 3}})}, ID)},
 		{5, new CompositeState({new DigitState(6, 6), new CharacterState({{'.',8}})}, INTNUM)},
 		{6, new DigitState(6,6,INTNUM)},
 		{7, new CharacterState({{'.', 8}}, INTNUM)},
 		{8, new DigitState(9, 9, INVALIDNUM)},
+		{9, new CompositeState({new DigitState(9,10), new CharacterState({{'e',11}})}, FLOATNUM)},
+		{10, new DigitState(9, 10, INVALIDNUM)},
+		{11, new CompositeState({new DigitState(15, INVALIDNUM), new CharacterState({{'+', 12}, {'-', 12}})}, INVALIDNUM)},
+		{12, new DigitState(15, INVALIDNUM)},
+		{15, new DigitState(15, 15, FLOATNUM)},
+		{16, new CharacterState({{'/', 17},{'*', 19}}, DIVIDE)},
+		{17, new CharacterState({{'\n', 18}}, 17)},
+
 
 		{ID, new FinalState(TT::ID)},
 		{INTNUM, new FinalState(TT::IntegerNumber)},
