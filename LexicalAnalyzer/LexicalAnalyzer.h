@@ -13,9 +13,12 @@ class LexicalAnalyzer {
 	void construct_states();
 
 	State* state;
-	int index;
+	int index = 0;
+	int line_number = 0;
 	std::string line = "";
-	std::ifstream file;
+	std::ofstream token_file;
+	std::ofstream error_file;
+	std::ifstream input_file;
 	void valid_state(int);
 public:
 	LexicalAnalyzer(std::string);
