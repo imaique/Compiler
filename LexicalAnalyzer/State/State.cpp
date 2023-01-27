@@ -7,11 +7,18 @@ State* State::get_state(int state) {
 	return state_map[state];
 }
 
-std::unordered_map<int, State*> State::state_map = {};
+void State::set_state_map(std::unordered_map<int, State*> state_map) {
+	State::state_map = state_map;
+}
+
+std::unordered_map<int, State*> State::state_map;
 
 State::State() : unsupported_transition(-1) {};
 
-State::State(int unsupported_transition) : unsupported_transition(unsupported_transition), is_final_state(false) {};
+State::State(int unsupported_transition) 
+	: unsupported_transition(unsupported_transition), is_final_state(false) {};
+
+/* Response */
 
 Response::Response(bool consume, int nextState) : consume(consume), nextState(State::get_state(nextState)) {};
 
@@ -19,7 +26,10 @@ Response::Response(bool consume, State* nextState) : consume(consume), nextState
 
 /* LetterState */
 
-LetterState::LetterState(int letter_transition) : letter_transition(letter_transition) {};
+LetterState::LetterState(int letter_transition) : LetterState(letter_transition, -1) {};
+
+LetterState::LetterState(int letter_transition, int unsupported_transition) 
+	: letter_transition(letter_transition), State(unsupported_transition) {};
 
 Response LetterState::get_next_state(char c) {
 	if (isalpha(c)) return r{ true, letter_transition };
@@ -27,6 +37,9 @@ Response LetterState::get_next_state(char c) {
 }
 
 /* DigitState */
+
+DigitState::DigitState(int digit_transition, int zero_transition)
+	: DigitState(digit_transition, zero_transition, -1) {};
 
 DigitState::DigitState(int digit_transition, int zero_transition, int unsupported_transition) 
 	: digit_transition(digit_transition), zero_transition(zero_transition), State(unsupported_transition) {};
@@ -37,6 +50,14 @@ Response DigitState::get_next_state(char c) {
 }
 
 /* CharacterState */
+
+CharacterState::CharacterState(std::unordered_map<char, int> valid_transitions, int unsupported_transition) 
+	: valid_transitions(valid_transitions), State(unsupported_transition) {
+}
+
+CharacterState::CharacterState(std::unordered_map<char, int> valid_transitions)
+	: CharacterState(valid_transitions, -1) {
+}
 
 Response CharacterState::get_next_state(char c) { 
 	if (valid_transitions.find(c) != valid_transitions.end()) return r{ true, valid_transitions.at(c) };
@@ -63,13 +84,13 @@ Response BlockCommentState::get_next_state(char c) {
 
 /* CompositeState */
 
-CompositeState::CompositeState(int unsupported_transition, std::vector<State> states) 
+CompositeState::CompositeState(std::vector<State*> states, int unsupported_transition)
 	: states(states), State(unsupported_transition) {};
 
 Response CompositeState::get_next_state(char c) {
-	for (State& state : states) {
+	for (State* state : states) {
 		// if the child state wants to perform a character transition, return it
-		Response response = state.get_next_state(c);
+		Response response = state->get_next_state(c);
 		if (response.consume) return response;
 	}
 	return r{ false, unsupported_transition };

@@ -21,7 +21,7 @@ protected:
 	State(int unsupported_transition);
 public:
 	static State* get_state(int);
-	//static void set_state_map(std::unordered_map<int, State*>);
+	static void set_state_map(std::unordered_map<int, State*>);
 	
 	const bool is_final_state = false;
 	virtual Response get_next_state(char) = 0;
@@ -30,7 +30,8 @@ public:
 class LetterState: virtual public State {
 	int letter_transition;
 public:
-	LetterState(int);
+	LetterState(int letter_transition);
+	LetterState(int letter_transition, int unsupported_transition);
 	Response get_next_state(char);
 };
 
@@ -38,6 +39,7 @@ class DigitState : virtual public State {
 	int digit_transition;
 	int zero_transition;
 public:
+	DigitState(int digit_transition, int zero_transition);
 	DigitState(int digit_transition, int zero_transition, int unsupported_transition);
 	Response get_next_state(char);
 };
@@ -60,14 +62,16 @@ public:
 };
 
 class CompositeState : virtual public State {
-	std::vector<State> states;
+	std::vector<State*> states;
 public:
-	CompositeState(int unsupported_transition, std::vector<State> states);
+	CompositeState(std::vector<State*> states, int unsupported_transition);
 	Response get_next_state(char);
 };
 
 class CharacterState : virtual public State {
 	const std::unordered_map<char, int> valid_transitions;
 public:
+	CharacterState(std::unordered_map<char, int> valid_transitions);
+	CharacterState(std::unordered_map<char, int> valid_transitions, int unsupported_transition);
 	Response get_next_state(char);
 };
