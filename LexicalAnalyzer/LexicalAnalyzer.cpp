@@ -62,19 +62,30 @@ void LexicalAnalyzer::increment_line() {
 	error_file << std::endl;
 }
 
-Token LexicalAnalyzer::get_next_token() {
-	// reset the state (might be a problem with block comments?)
-	this->state = State::get_state(1);
 
-	// trim starting whitespace
-	while (index < line.size() && (line[index] == ' ' || line[index] == '\t')) index++;
+Token LexicalAnalyzer::get_next_token() {
+	has_next_token();
+	this->state = State::get_state(1);
+	std::stringstream token_stream;
 
 	int start = index;
+	const int location = line_number;
 
-	while (index < line.size() && !(state->is_final_state)) {
-		char c = line[index];
+	while (!state->is_final_state) {
+		bool end_of_line = index == line.size();
+		char c;
+		if (!end_of_line) c = line[index];
+		else {
+			c = '\n';
+			if(!std::getline(input_file, line)) break;
+			increment_line();
+		}
 		Response response = state->get_next_state(c);
-		if (response.consume) index++;
+		if (response.consume) {
+			if(c == '\n') token_stream << "\\n";
+			else token_stream << c;
+			if(!end_of_line) index++;
+		}
 		state = response.nextState;
 	}
 
@@ -85,27 +96,32 @@ Token LexicalAnalyzer::get_next_token() {
 
 	FinalState* const final_state = dynamic_cast<FinalState*>(state);
 	TT token_type = final_state->get_token_type();
-	const std::string lexeme = line.substr(start, index - start);
-	const int location = line_number;
+	const std::string lexeme = token_stream.str();
+	
 
 	if (token_type == TT::ID && Token::is_reserved_word(lexeme)) 
 		token_type = Token::get_reserved_type(lexeme);
 
 	Token token(lexeme, location, token_type);
 
-	//if (!firs_token_in_line) token_file << " ";
 	token_file << token;
 
 	return token;
 }
-bool LexicalAnalyzer::has_next_token() {
-	if (index < line.size() && line[index] == '\n') index++;
-	if (index < line.size()) return true;
-	if (std::getline(input_file, line)) {
+void LexicalAnalyzer::skip_empty_lines() {
+	// trim starting whitespace
+	while (index < line.size() && (line[index] == ' ' || line[index] == '\t' || line[index] == '\n')) index++;
+	while (index >= line.size() && std::getline(input_file, line)) {
 		increment_line();
-		return true;
 	}
-	token_file.close();
-	error_file.close();
-	return false;
 }
+bool LexicalAnalyzer::has_next_token() {
+	skip_empty_lines();
+	if (index < line.size()) return true;
+	else {
+		token_file.close();
+		error_file.close();
+		return false;
+	}
+}
+
