@@ -3,15 +3,12 @@
 #include <unordered_map>
 
 class Token {
-	std::string lexeme;
-	int line_location;
 public:
-	
 	enum class Type {
 		IntegerNumber,
 		ID,
 		FloatNumber,
-		Error,
+		InvalidNumber,
 		Equal,
 		NotEqual,
 		GreaterThan,
@@ -35,6 +32,9 @@ public:
 		Colon,
 		ReturnType,
 		ScopeOperator,
+		OR,
+		AND,
+		NOT,
 		Integer,
 		Float,
 		Void,
@@ -57,7 +57,22 @@ public:
 		InvalidCharacter,
 	};
 
-	static const std::unordered_map<std::string, Type> reserved_word_to_token_type;
+	Token(std::string lexeme, int line_location, Type token_type);
 
-	std::string token_type_to_string(Type type);
+	
+
+	friend std::ostream& operator<<(std::ostream& os, const Token& t);
+
+
+
+	static std::string get_string(Type type);
+	static Type get_reserved_type(std::string lexeme);
+	static bool is_reserved_word(std::string lexeme);
+
+private:
+	static const std::unordered_map<Type, std::string> token_type_to_string;
+	static const std::unordered_map<std::string, Type> reserved_word_to_token_type;
+	std::string lexeme;
+	int line_location;
+	Type token_type;
 };
