@@ -5,7 +5,7 @@
 typedef Token::Type T;
 
 Token::Token(std::string lexeme, int line_location, Type token_type) 
-	: lexeme(lexeme), line_location(line_location), token_type(token_type) {}
+	: lexeme(lexeme), line_location(line_location), token_type(token_type), is_error(is_error_token_type(token_type)) {}
 
 std::string Token::get_string(Type type) { return token_type_to_string.at(type); }
 
@@ -16,6 +16,19 @@ T Token::get_reserved_type(std::string lexeme) {
 bool Token::is_reserved_word(std::string lexeme) {
 	return reserved_word_to_token_type.find(lexeme) != reserved_word_to_token_type.end();
 }
+
+std::string Token::get_error_string(Type type) { return error_type_to_string.at(type); }
+
+bool Token::is_error_token_type(T type) {
+	return error_type_to_string.find(type) != error_type_to_string.end();
+}
+
+const std::unordered_map<Token::Type, std::string> Token::error_type_to_string = {
+	{T::InvalidNumber, "Invalid number"},
+	{T::InvalidCharacter, "Invalid character"},
+	{T::UnclosedBlockComment, "Unterminated block comment"},
+
+};
 
 const std::unordered_map<Token::Type, std::string> Token::token_type_to_string = {
 		{T::IntegerNumber, "intnum"},
@@ -42,7 +55,7 @@ const std::unordered_map<Token::Type, std::string> Token::token_type_to_string =
 		{T::SemiColon, "semi"},
 		{T::Comma, "comma"},
 		{T::Point, "dot"},
-		{T::Colon, "closecubr"},
+		{T::Colon, "colon"},
 		{T::ReturnType, "returntype"},
 		{T::ScopeOperator, "scopeop"},
 		{T::OR, "or"},
@@ -69,6 +82,7 @@ const std::unordered_map<Token::Type, std::string> Token::token_type_to_string =
 		{T::Private, "private"},
 		{T::LineComment, "inlinecmt"},
 		{T::BlockComment, "blockcmt"},
+		{T::UnclosedBlockComment, "openblockcmt"},
 		{T::InvalidCharacter, "invalidchar"},
 };
 
