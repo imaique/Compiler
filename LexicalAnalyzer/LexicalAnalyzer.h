@@ -17,12 +17,14 @@ class LexicalAnalyzer {
 	int line_number;
 	std::string line;
 	std::ofstream token_file;
+	int last_token_line;
 	std::ofstream error_file;
 	std::ifstream input_file;
 	void valid_state(int);
 	void increment_line();
 	void increment_index();
 	void skip_empty_lines();
+	void print_token(Token token);
 public:
 	LexicalAnalyzer(std::string);
 
