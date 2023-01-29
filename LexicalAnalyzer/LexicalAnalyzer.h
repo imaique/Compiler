@@ -10,8 +10,6 @@ class MapAndToken {
 };
 
 class LexicalAnalyzer {
-	void construct_states();
-
 	State* state;
 	int index;
 	int line_number;

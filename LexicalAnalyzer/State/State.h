@@ -14,7 +14,8 @@ public:
 };
 
 class State {
-	static std::unordered_map<int, State*> state_map;
+	static const std::unordered_map<int, State*> get_state_map();
+	static const std::unordered_map<int, State*> state_map;
 protected:
 	int unsupported_transition;
 	bool consume_on_unsupported_transition;
@@ -23,7 +24,6 @@ protected:
 	State(int unsupported_transition, bool consume_on_unsupported_transition);
 public:
 	static State* get_state(int);
-	static void set_state_map(std::unordered_map<int, State*>);
 	
 	const bool is_final_state;
 	virtual Response get_next_state(char) = 0;
