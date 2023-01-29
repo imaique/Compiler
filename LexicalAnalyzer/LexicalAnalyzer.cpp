@@ -32,7 +32,6 @@ Token LexicalAnalyzer::get_next_token() {
 	this->state = State::get_state(1);
 	std::stringstream token_stream;
 
-	int start = index;
 	const int location = line_number;
 
 	while (!state->is_final_state) {
