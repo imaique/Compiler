@@ -5,7 +5,7 @@
 
 
 int main() {
-	std::vector<std::string> test_files{ "lexpositivegrading" , "lexnegativegrading", "example-polynomial", "example-bubblesort"};
+	std::vector<std::string> test_files{ "lexpositivegrading" , "lexnegativegrading", "example-polynomial", "example-bubblesort", "edge-cases"};
 
 	for (auto filename : test_files) {
 		LexicalAnalyzer positive = LexicalAnalyzer(filename);

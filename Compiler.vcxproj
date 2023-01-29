@@ -98,7 +98,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="driver.cpp" />
+    <ClCompile Include="lexdriver.cpp" />
     <ClCompile Include="LexicalAnalyzer\LexicalAnalyzer.cpp" />
     <ClCompile Include="LexicalAnalyzer\State\State.cpp" />
     <ClCompile Include="LexicalAnalyzer\Token.cpp" />
