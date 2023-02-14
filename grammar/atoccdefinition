@@ -1,0 +1,172 @@
+START -> rept-START0
+
+aParams -> expr rept-aParams1
+aParams -> EPSILON
+
+aParamsTail -> ',' expr
+
+addOp -> '+'
+addOp -> '-'
+addOp -> 'or'
+
+arithExpr -> term rightrec-arithExpr
+
+arraySize -> '[' arraySizeTail
+arraySizeTail -> 'intNum' ']'
+arraySizeTail -> ']'
+
+assignOp -> '='
+
+assignStat -> variable assignOp expr
+
+classDecl -> 'class' 'id' opt-classDecl2 '{' rept-classDecl4 '}' ';'
+
+classDeclOrFuncDef -> classDecl
+classDeclOrFuncDef -> funcDef
+
+expr -> factor rightrec-term rightrec-arithExpr
+expr -> relExpr
+
+fParams -> type 'id' rept-fParams2 rept-fParams3
+fParams -> EPSILON
+
+fParamsTail -> ',' type 'id' rept-fParamsTail3
+
+factor -> variable
+factor -> functionCall
+factor -> 'intLit'
+factor -> 'floatLit'
+factor -> '(' arithExpr ')'
+factor -> 'not' factor
+factor -> sign factor
+
+funcBody -> '{' rept-funcBody1 '}'
+
+funcDef -> funcHead funcBody
+
+funcHead -> 'function' opt-funcHead1 'id' '(' fParams ')' 'arrow' returnType
+funcHead -> 'function' 'id' 'sr' 'constructor' '(' fParams ')'
+
+functionCall -> rept-functionCall0 'id' '(' aParams ')'
+
+idnest -> 'id' idnestTail
+
+idnestTail -> '[' arithExpr ']' rept-idnest1 '.'
+idnestTail -> EPSILON '.'
+idnestTail -> '(' aParams ')' '.'
+
+indice -> '[' arithExpr ']'
+
+localVarDecl -> 'localVar' 'id' ':' type rept-localVarDecl4 ';'
+localVarDecl -> 'localVar' 'id' ':' type '(' aParams ')' ';'
+
+localVarDeclOrStmt -> localVarDecl
+localVarDeclOrStmt -> statement
+
+memberDecl -> memberFuncDecl
+memberDecl -> memberVarDecl
+
+memberFuncDecl -> 'function' 'id' ':' '(' fParams ')' 'arrow' returnType ';'
+memberFuncDecl -> 'constructor' ':' '(' fParams ')' ';'
+
+memberVarDecl -> 'attribute' 'id' ':' type rept-memberVarDecl4 ';'
+
+multOp -> '*'
+multOp -> '/'
+multOp -> 'and'
+
+opt-classDecl2 -> 'isa' 'id' rept-opt-classDecl22
+opt-classDecl2 -> EPSILON
+
+opt-funcHead1 -> 'id' 'sr'
+opt-funcHead1 -> EPSILON
+
+relExpr -> factor rightrec-term rightrec-arithExpr relOp arithExpr
+
+relOp -> 'eq'
+relOp -> 'neq'
+relOp -> 'lt'
+relOp -> 'gt'
+relOp -> 'leq'
+relOp -> 'geq'
+
+rept-START0 -> classDeclOrFuncDef rept-START0
+rept-START0 -> EPSILON
+
+rept-aParams1 -> aParamsTail rept-aParams1
+rept-aParams1 -> EPSILON
+
+rept-classDecl4 -> visibility memberDecl rept-classDecl4
+rept-classDecl4 -> EPSILON
+
+rept-fParams2 -> arraySize rept-fParams2
+rept-fParams2 -> EPSILON
+
+rept-fParams3 -> fParamsTail rept-fParams3
+rept-fParams3 -> EPSILON
+
+rept-fParamsTail3 -> arraySize rept-fParamsTail3
+rept-fParamsTail3 -> EPSILON
+
+rept-funcBody1 -> localVarDeclOrStmt rept-funcBody1
+rept-funcBody1 -> EPSILON
+
+rept-functionCall0 -> 'id' idnestTail rept-functionCall0
+rept-functionCall0 -> EPSILON
+
+rept-idnest1 -> indice rept-idnest1
+rept-idnest1 -> EPSILON
+
+rept-localVarDecl4 -> arraySize rept-localVarDecl4
+rept-localVarDecl4 -> EPSILON
+
+rept-memberVarDecl4 -> arraySize rept-memberVarDecl4
+rept-memberVarDecl4 -> EPSILON
+
+rept-opt-classDecl22 -> ',' 'id' rept-opt-classDecl22
+rept-opt-classDecl22 -> EPSILON
+
+rept-statBlock1 -> statement rept-statBlock1
+rept-statBlock1 -> EPSILON
+
+rept-variable0 -> 'id' idnestTail rept-variable0
+rept-variable0 -> EPSILON
+
+rept-variable2 -> '[' arithExpr ']' rept-variable2
+rept-variable2 -> EPSILON
+
+returnType -> type
+returnType -> 'void'
+
+rightrec-arithExpr -> EPSILON
+rightrec-arithExpr -> addOp term rightrec-arithExpr
+
+rightrec-term -> EPSILON
+rightrec-term -> multOp factor rightrec-term
+
+sign -> '+'
+sign -> '-'
+
+statBlock -> '{' rept-statBlock1 '}'
+statBlock -> statement
+statBlock -> EPSILON
+
+statement -> assignStat ';'
+statement -> 'if' '(' relExpr ')' 'then' statBlock 'else' statBlock ';'
+statement -> 'while' '(' relExpr ')' statBlock ';'
+statement -> 'read' '(' variable ')' ';'
+statement -> 'write' '(' expr ')' ';'
+statement -> 'return' '(' expr ')' ';'
+statement -> functionCall ';'
+
+term -> factor rightrec-term
+
+type -> 'integer'
+type -> 'float'
+type -> 'id'
+
+variable -> rept-variable0 'id' rept-variable2
+
+visibility -> 'public'
+visibility -> 'private'
+visibility -> EPSILON

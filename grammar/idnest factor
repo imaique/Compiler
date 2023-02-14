@@ -1,0 +1,125 @@
+input:
+idnest -> 'id' rept-idnest1 '.' | 'id' '(' aParams ')' '.'
+rept-idnest1 -> indice rept-idnest1 | ϵ
+aParams -> expr rept-aParams1 | ϵ
+indice -> '[' arithExpr ']'
+arithExpr -> term rightrec-arithExpr
+term -> factor rightrec-term
+expr -> arithExpr | relExpr
+rept-aParams1 -> aParamsTail rept-aParams1 | ϵ
+rightrec-arithExpr -> ϵ | addOp term rightrec-arithExpr
+rightrec-term -> ϵ | multOp factor rightrec-term
+relExpr -> arithExpr relOp arithExpr
+aParamsTail -> ',' expr
+addOp -> '+' | '-' |'or'
+factor -> variable | functionCall | 'intLit' | 'floatLit' | '(' arithExpr ')' | 'not' factor | sign factor
+multOp -> '*' | '/' | 'and'
+relOp -> 'eq' | 'neq' | 'lt' | 'gt' | 'leq' | 'geq'
+variable -> rept-variable0 'id' rept-variable2
+functionCall -> rept-functionCall0 'id' '(' aParams ')'
+sign -> '+' | '-'
+rept-variable0 -> idnest rept-variable0 | ϵ
+rept-variable2 -> indice rept-variable2 | ϵ
+rept-functionCall0 -> idnest rept-functionCall0 | ϵ
+
+output:
+idnest -> 'id' idnestTail
+rept-idnest1 -> indice rept-idnest1
+        | ϵ
+aParams -> expr rept-aParams1
+        | ϵ
+indice -> '[' arithExpr ']'
+arithExpr -> term rightrec-arithExpr
+  term -> factor rightrec-term
+  expr -> factor rightrec-term rightrec-arithExpr
+        | relExpr
+rept-aParams1 -> aParamsTail rept-aParams1
+        | ϵ
+rightrec-arithExpr -> ϵ
+        | addOp term rightrec-arithExpr
+rightrec-term -> ϵ
+        | multOp factor rightrec-term
+relExpr -> factor rightrec-term rightrec-arithExpr relOp arithExpr
+aParamsTail -> ',' expr
+ addOp -> '+'
+        | '-' |'or'
+factor -> variable
+        | functionCall
+        | 'intLit'
+        | 'floatLit'
+        | '(' arithExpr ')'
+        | 'not' factor
+        | sign factor
+multOp -> '*'
+        | '/'
+        | 'and'
+ relOp -> 'eq'
+        | 'neq'
+        | 'lt'
+        | 'gt'
+        | 'leq'
+        | 'geq'
+variable -> rept-variable0 'id' rept-variable2
+functionCall -> rept-functionCall0 'id' '(' aParams ')'
+  sign -> '+'
+        | '-'
+rept-variable0 -> 'id' idnestTail rept-variable0
+        | ϵ
+rept-variable2 -> '[' arithExpr ']' rept-variable2
+        | ϵ
+rept-functionCall0 -> 'id' idnestTail rept-functionCall0
+        | ϵ
+idnestTail -> '[' arithExpr ']' rept-idnest1 '.'
+        | ϵ '.'
+        | '(' aParams ')' '.'
+
+TRANSFORMED:
+idnest -> 'id' idnestTail
+rept-idnest1 -> indice rept-idnest1
+        | ϵ
+aParams -> expr rept-aParams1
+        | ϵ
+indice -> '[' arithExpr ']'
+arithExpr -> term rightrec-arithExpr
+  term -> factor rightrec-term
+  expr -> factor rightrec-term rightrec-arithExpr
+        | relExpr
+rept-aParams1 -> aParamsTail rept-aParams1
+        | ϵ
+rightrec-arithExpr -> ϵ
+        | addOp term rightrec-arithExpr
+rightrec-term -> ϵ
+        | multOp factor rightrec-term
+relExpr -> factor rightrec-term rightrec-arithExpr relOp arithExpr
+aParamsTail -> ',' expr
+ addOp -> '+'
+        | '-' |'or'
+factor -> variable
+        | functionCall
+        | 'intLit'
+        | 'floatLit'
+        | '(' arithExpr ')'
+        | 'not' factor
+        | sign factor
+multOp -> '*'
+        | '/'
+        | 'and'
+ relOp -> 'eq'
+        | 'neq'
+        | 'lt'
+        | 'gt'
+        | 'leq'
+        | 'geq'
+variable -> rept-variable0 'id' rept-variable2
+functionCall -> rept-functionCall0 'id' '(' aParams ')'
+  sign -> '+'
+        | '-'
+rept-variable0 -> 'id' idnestTail rept-variable0
+        | ϵ
+rept-variable2 -> '[' arithExpr ']' rept-variable2
+        | ϵ
+rept-functionCall0 -> 'id' idnestTail rept-functionCall0
+        | ϵ
+idnestTail -> '[' arithExpr ']' rept-idnest1 '.'
+        | ϵ '.'
+        | '(' aParams ')' '.'
