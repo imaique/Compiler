@@ -150,20 +150,14 @@ statementTail -> indice rept-indice statementBrack
           | pointnestr statementPointNest
           | params statementParent
 
-statementParent -> pointnestr statementParentPointNest
+statementParent -> pointnestr statementPointNest
           | ';'
           
-statementParentPointNest -> rept-indice assignEnd
-          | endparams
-
 statementPointNest -> rept-indice assignEnd
           | endparams
 
 statementBrack -> assignEnd
-          | pointnestr statementBrackPointNest
-
-statementBrackPointNest -> rept-indice assignEnd
-          | endparams
+          | pointnestr statementPointNest
 
 endparams -> params ';'
 
@@ -181,22 +175,9 @@ rept-indice -> indice rept-indice
 
 indice -> '[' arithExpr ']'
 
-assignStat -> variable assignOp expr
-
 variableBrack -> EPSILON | pointnestr rept-indice
 
-functionCall -> 'id' functionCallTail
-
-functionCallTail -> params functionCallTailTail
-        | indice rept-indice functionCallEnd
-        |  functionCallEnd
-
 pointnestr -> '.' rept-idnestr 'id'
-
-functionCallEnd -> pointnestr params
-
-functionCallTailTail -> EPSILON
-        | functionCallEnd
 
 rept-idnestr -> 'id' rept-idnestrTail
 
