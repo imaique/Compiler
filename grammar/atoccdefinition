@@ -27,20 +27,18 @@ expr -> factor rightrec-term rightrec-arithExpr exprTail
 exprTail -> EPSILON
           | relOp arithExpr
 
-fParams -> type 'id' rept-fParams2 rept-fParams3
+fParams -> type 'id' rept-arraySize rept-fParams3
 fParams -> EPSILON
 
-fParamsTail -> ',' type 'id' rept-fParamsTail3
-
-indice -> '[' arithExpr ']'
+fParamsTail -> ',' type 'id' rept-arraySize
 
 rept-idnest -> '.' 'id' idnestTail rept-idnest
         | EPSILON
 
-factorIDTail -> '[' arithExpr ']' rept-indice continuation
+factorIDTail -> indice rept-indice continuation
         | EPSILON
         | rept-idnest 'id' factorTail 
-        | '(' aParams ')' continuation
+        | params continuation
 
 continuation -> rept-idnest 'id' factorTail 
 
@@ -52,7 +50,7 @@ factor -> 'id' factorIDTail
         | sign factor
 
 factorTail -> rept-indice
-        | '(' aParams ')'
+        | params
 
 funcBody -> '{' rept-funcBody1 '}'
 
@@ -68,7 +66,7 @@ funcHeadTailTailTail -> 'id' '(' fParams ')' 'arrow' returnType  | 'constructor'
 
 localVarDecl -> 'localVar' 'id' ':' type localVarDeclTail
 
-localVarDeclTail -> rept-localVarDecl4 ';' | '(' aParams ')' ';'
+localVarDeclTail -> rept-arraySize ';' | endparams
 
 localVarDeclOrStmt -> localVarDecl
 localVarDeclOrStmt -> statement
@@ -79,7 +77,7 @@ memberDecl -> memberVarDecl
 memberFuncDecl -> 'function' 'id' ':' '(' fParams ')' 'arrow' returnType ';'
 memberFuncDecl -> 'constructor' ':' '(' fParams ')' ';'
 
-memberVarDecl -> 'attribute' 'id' ':' type rept-memberVarDecl4 ';'
+memberVarDecl -> 'attribute' 'id' ':' type rept-arraySize ';'
 
 multOp -> '*'
 multOp -> '/'
@@ -107,23 +105,14 @@ rept-aParams1 -> EPSILON
 rept-classDecl4 -> visibility memberDecl rept-classDecl4
 rept-classDecl4 -> EPSILON
 
-rept-fParams2 -> arraySize rept-fParams2
-rept-fParams2 -> EPSILON
+rept-arraySize -> arraySize rept-arraySize
+rept-arraySize -> EPSILON
 
 rept-fParams3 -> fParamsTail rept-fParams3
 rept-fParams3 -> EPSILON
 
-rept-fParamsTail3 -> arraySize rept-fParamsTail3
-rept-fParamsTail3 -> EPSILON
-
 rept-funcBody1 -> localVarDeclOrStmt rept-funcBody1
 rept-funcBody1 -> EPSILON
-
-rept-localVarDecl4 -> arraySize rept-localVarDecl4
-rept-localVarDecl4 -> EPSILON
-
-rept-memberVarDecl4 -> arraySize rept-memberVarDecl4
-rept-memberVarDecl4 -> EPSILON
 
 rept-opt-classDecl22 -> ',' 'id' rept-opt-classDecl22
 rept-opt-classDecl22 -> EPSILON
@@ -154,34 +143,38 @@ statement -> 'read' '(' variable ')' ';'
 statement -> 'write' '(' expr ')' ';' 
 statement -> 'return' '(' expr ')' ';' 
 
-statementTail -> '[' arithExpr ']' rept-indice statementBrack
+params -> '(' aParams ')'
+
+statementTail -> indice rept-indice statementBrack
           | assignEnd
           | pointnestr statementPointNest
-          | '(' aParams ')' statementParent
+          | params statementParent
 
 statementParent -> pointnestr statementParentPointNest
           | ';'
           
 statementParentPointNest -> rept-indice assignEnd
-          | '(' aParams ')' ';'
+          | endparams
 
 statementPointNest -> rept-indice assignEnd
-          | '(' aParams ')' ';'
+          | endparams
 
 statementBrack -> assignEnd
           | pointnestr statementBrackPointNest
 
 statementBrackPointNest -> rept-indice assignEnd
-          | '(' aParams ')' ';'
-          
+          | endparams
+
+endparams -> params ';'
+
 assignEnd -> assignOp expr ';'
 
 variable -> 'id' variableTail
 
-variableTail -> '[' arithExpr ']' rept-indice variableBrack
+variableTail -> indice rept-indice variableBrack
         | EPSILON
         | pointnestr rept-indice
-        | '(' aParams ')' pointnestr rept-indice
+        | params pointnestr rept-indice
 
 rept-indice -> indice rept-indice
         | EPSILON
@@ -194,13 +187,13 @@ variableBrack -> EPSILON | pointnestr rept-indice
 
 functionCall -> 'id' functionCallTail
 
-functionCallTail -> '(' aParams ')' functionCallTailTail
-        | '[' arithExpr ']' rept-indice functionCallEnd
+functionCallTail -> params functionCallTailTail
+        | indice rept-indice functionCallEnd
         |  functionCallEnd
 
 pointnestr -> '.' rept-idnestr 'id'
 
-functionCallEnd -> pointnestr '(' aParams ')'
+functionCallEnd -> pointnestr params
 
 functionCallTailTail -> EPSILON
         | functionCallEnd
@@ -208,13 +201,13 @@ functionCallTailTail -> EPSILON
 rept-idnestr -> 'id' rept-idnestrTail
 
 rept-idnestrTail -> EPSILON
-        | '[' arithExpr ']' rept-indice pointnestr
+        | indice rept-indice pointnestr
         | pointnestr
-        | '(' aParams ')' pointnestr
+        | params pointnestr
 
-idnestTail -> '[' arithExpr ']' rept-indice '.'
+idnestTail -> indice rept-indice '.'
         | '.'
-        | '(' aParams ')' '.'
+        | params '.'
 
 term -> factor rightrec-term
 
