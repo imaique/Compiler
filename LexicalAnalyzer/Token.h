@@ -58,6 +58,7 @@ public:
 		BlockComment,
 		InvalidCharacter,
 		UnclosedBlockComment,
+		EndOfFile,
 	};
 
 	Token(std::string lexeme, int line_location, Type token_type);
@@ -75,6 +76,7 @@ public:
 	const std::string lexeme;
 	const int line_location;
 	const Type token_type;
+	//const std::string string_type;
 	const bool is_error;
 
 private:
