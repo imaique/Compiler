@@ -1,0 +1,4 @@
+ARRAYSIZE -> lsqbr Flsqbr .
+
+Flsqbr -> intnum rsqbr
+         |rsqbr .

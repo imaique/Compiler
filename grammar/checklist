@@ -1,0 +1,99 @@
+arraySize -> '[' arraySizeTail
+
+arraySizeTail -> 'intNum' ']' | ']'
+
+expr -> factor rightrec-term rightrec-arithExpr exprTail
+
+exprTail -> EPSILON
+          | relOp arithExpr
+
+fParams -> type 'id' rept-arraySize rept-fParams3
+
+fParamsTail -> ',' type 'id' rept-arraySize
+
+rept-idnest -> '.' 'id' idnestTail rept-idnest
+        | EPSILON
+
+factorIDTail -> indice rept-indice continuation
+        | EPSILON
+        | rept-idnest 'id' factorTail 
+        | params continuation
+
+continuation -> rept-idnest 'id' factorTail 
+
+factor -> 'id' factorIDTail
+
+factorTail -> rept-indice
+        | params
+
+funcBody -> '{' rept-funcBody1 '}'
+
+funcDef -> funcHead funcBody
+
+funcHead -> 'function' funcHeadTail
+
+funcHeadTail -> 'id' funcHeadTailTail
+
+funcHeadTailTail -> 'sr' funcHeadTailTailTail | '(' fParams ')' 'arrow' returnType 
+
+funcHeadTailTailTail -> 'id' '(' fParams ')' 'arrow' returnType  | 'constructor' '(' fParams ')'
+
+localVarDecl -> 'localVar' 'id' ':' type localVarDeclTail
+
+localVarDeclTail -> rept-arraySize ';' | endparams
+
+memberVarDecl -> 'attribute' 'id' ':' type rept-arraySize ';'
+
+
+rept-arraySize -> arraySize rept-arraySize
+rept-arraySize -> EPSILON
+
+
+statement -> 'id' statementTail
+
+params -> '(' aParams ')'
+
+statementTail -> indice rept-indice statementBrack
+          | assignEnd
+          | pointnestr statementPointNest
+          | params statementParent
+
+statementParent -> pointnestr statementPointNest
+          | ';'
+          
+statementPointNest -> rept-indice assignEnd
+          | endparams
+
+statementBrack -> assignEnd
+          | pointnestr statementPointNest
+
+endparams -> params ';'
+
+assignEnd -> assignOp expr ';'
+
+variable -> 'id' variableTail
+
+variableTail -> indice rept-indice variableBrack
+        | EPSILON
+        | pointnestr rept-indice
+        | params pointnestr rept-indice
+
+rept-indice -> indice rept-indice
+        | EPSILON
+
+indice -> '[' arithExpr ']'
+
+variableBrack -> EPSILON | pointnestr rept-indice
+
+pointnestr -> '.' rept-idnestr 'id'
+
+rept-idnestr -> 'id' rept-idnestrTail
+
+rept-idnestrTail -> EPSILON
+        | indice rept-indice pointnestr
+        | pointnestr
+        | params pointnestr
+
+idnestTail -> indice rept-indice '.'
+        | '.'
+        | params '.'

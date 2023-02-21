@@ -1,0 +1,201 @@
+START -> Rept-START0
+
+AParams -> Expr Rept-AParams1
+AParams -> EPSILON
+
+AParamsTail -> ',' Expr
+
+AddOp -> '+'
+AddOp -> '-'
+AddOp -> 'or'
+
+ArithExpr -> Term RightRec-ArithExpr
+
+ArraySize -> '[' ArraySizeTail
+
+ArraySizeTail -> 'intNum' ']' | ']'
+
+AssignOp -> '='
+
+ClassDecl -> 'class' 'id' Opt-ClassDecl2 '{' Rept-ClassDecl4 '}' ';'
+
+ClassDeclOrFuncDef -> ClassDecl
+ClassDeclOrFuncDef -> FuncDef
+
+Expr -> Factor RightRec-Term RightRec-ArithExpr ExprTail
+
+ExprTail -> EPSILON
+| RelOp ArithExpr
+
+FParams -> Type 'id' Rept-ArraySize Rept-FParams3
+FParams -> EPSILON
+
+FParamsTail -> ',' Type 'id' Rept-ArraySize
+
+Rept-Idnest -> '.' 'id' IdnestTail Rept-Idnest
+| EPSILON
+
+FactorIDTail -> Indice Rept-Indice Continuation
+| EPSILON
+| Rept-Idnest 'id' FactorTail
+| Params Continuation
+
+Continuation -> Rept-Idnest 'id' FactorTail
+
+Factor -> 'id' FactorIDTail
+| 'intLit'
+| 'floatLit'
+| '(' ArithExpr ')'
+| 'not' Factor
+| Sign Factor
+
+FactorTail -> Rept-Indice
+| Params
+
+FuncBody -> '{' Rept-FuncBody1 '}'
+
+FuncDef -> FuncHead FuncBody
+
+FuncHead -> 'function' FuncHeadTail
+
+FuncHeadTail -> 'id' FuncHeadTailTail
+
+FuncHeadTailTail -> 'sr' FuncHeadTailTailTail | '(' FParams ')' 'arrow' ReturnType
+
+FuncHeadTailTailTail -> 'id' '(' FParams ')' 'arrow' ReturnType | 'constructor' '(' FParams ')'
+
+LocalVarDecl -> 'localVar' 'id' ':' Type LocalVarDeclTail
+
+LocalVarDeclTail -> Rept-ArraySize ';' | Endparams
+
+LocalVarDeclOrStmt -> LocalVarDecl
+LocalVarDeclOrStmt -> Statement
+
+MemberDecl -> MemberFuncDecl
+MemberDecl -> MemberVarDecl
+
+MemberFuncDecl -> 'function' 'id' ':' '(' FParams ')' 'arrow' ReturnType ';'
+MemberFuncDecl -> 'constructor' ':' '(' FParams ')' ';'
+
+MemberVarDecl -> 'attribute' 'id' ':' Type Rept-ArraySize ';'
+
+MultOp -> '*'
+MultOp -> '/'
+MultOp -> 'and'
+
+Opt-ClassDecl2 -> 'isa' 'id' Rept-Opt-ClassDecl22
+Opt-ClassDecl2 -> EPSILON
+
+RelExpr -> ArithExpr RelOp ArithExpr
+
+RelOp -> 'eq'
+RelOp -> 'neq'
+RelOp -> 'lt'
+RelOp -> 'gt'
+RelOp -> 'leq'
+RelOp -> 'geq'
+
+Rept-START0 -> ClassDeclOrFuncDef Rept-START0
+Rept-START0 -> EPSILON
+
+Rept-AParams1 -> AParamsTail Rept-AParams1
+Rept-AParams1 -> EPSILON
+
+Rept-ClassDecl4 -> Visibility MemberDecl Rept-ClassDecl4
+Rept-ClassDecl4 -> EPSILON
+
+Rept-ArraySize -> ArraySize Rept-ArraySize
+Rept-ArraySize -> EPSILON
+
+Rept-FParams3 -> FParamsTail Rept-FParams3
+Rept-fParams3 -> EPSILON
+
+Rept-FuncBody1 -> LocalVarDeclOrStmt Rept-FuncBody1
+Rept-FuncBody1 -> EPSILON
+
+Rept-Opt-ClassDecl22 -> ',' 'id' Rept-Opt-ClassDecl22
+Rept-Opt-ClassDecl22 -> EPSILON
+
+Rept-StatBlock1 -> Statement Rept-StatBlock1
+Rept-StatBlock1 -> EPSILON
+
+ReturnType -> Type
+ReturnType -> 'void'
+
+RightRec-ArithExpr -> EPSILON
+RightRec-ArithExpr -> AddOp Term RightRec-ArithExpr
+
+RightRec-Term -> EPSILON
+RightRec-Term -> MultOp Factor RightRec-Term
+
+Sign -> '+'
+Sign -> '-'
+
+StatBlock -> '{' Rept-StatBlock1 '}'
+StatBlock -> Statement
+StatBlock -> EPSILON
+
+Statement -> 'id' StatementTail
+Statement -> 'if' '(' RelExpr ')' 'then' StatBlock 'else' StatBlock ';'
+Statement -> 'while' '(' RelExpr ')' StatBlock ';'
+Statement -> 'read' '(' Variable ')' ';'
+Statement -> 'write' '(' Expr ')' ';'
+Statement -> 'return' '(' Expr ')' ';'
+
+Params -> '(' AParams ')'
+
+StatementTail -> Indice Rept-Indice StatementBrack
+| AssignEnd
+| PointnestR StatementPointnest
+| Params StatementParent
+
+StatementParent -> PointnestR StatementPointnest
+| ';'
+
+StatementPointnest -> Rept-Indice AssignEnd
+| Endparams
+
+StatementBrack -> AssignEnd
+| PointnestR StatementPointnest
+
+Endparams -> Params ';'
+
+AssignEnd -> AssignOp Expr ';'
+
+Variable -> 'id' VariableTail
+
+VariableTail -> Indice Rept-Indice VariableBrack
+| EPSILON
+| PointnestR Rept-Indice
+| Params PointnestR Rept-Indice
+
+Rept-Indice -> Indice Rept-Indice
+| EPSILON
+
+Indice -> '[' ArithExpr ']'
+
+VariableBrack -> EPSILON
+| PointnestR Rept-Indice
+
+PointnestR -> '.' Rept-Idnestr 'id'
+
+Rept-Idnestr -> 'id' Rept-IdnestrTail
+
+Rept-IdnestrTail -> EPSILON
+        | Indice Rept-Indice Pointnestr
+        | Pointnestr
+        | Params Pointnestr
+
+IdnestTail -> Indice Rept-Indice '.'
+        | '.'
+        | Params '.'
+
+Term -> Factor Rightrec-Term
+
+Type -> 'integer'
+Type -> 'float'
+Type -> 'id'
+
+Visibility -> 'public'
+Visibility -> 'private'
+Visibility -> EPSILON
