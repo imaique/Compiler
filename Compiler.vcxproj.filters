@@ -24,7 +24,10 @@
     <ClCompile Include="LexicalAnalyzer\LexicalAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lexdriver.cpp">
+    <ClCompile Include="SyntaxAnalyzer\Parser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="parsedriver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -36,6 +39,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LexicalAnalyzer\Token.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SyntaxAnalyzer\Parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
