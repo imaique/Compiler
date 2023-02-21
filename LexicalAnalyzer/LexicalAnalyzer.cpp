@@ -28,7 +28,7 @@ void LexicalAnalyzer::increment_line() {
 
 
 Token LexicalAnalyzer::get_next_token() {
-	has_next_token();
+	if (!has_next_token()) return Token("", line_number, TT::EndOfFile);
 	this->state = State::get_state(1);
 	std::stringstream token_stream;
 
