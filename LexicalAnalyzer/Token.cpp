@@ -4,10 +4,10 @@
 
 typedef Token::Type T;
 
-Token::Token(const Token& t) : line_location(t.line_location), lexeme(t.lexeme), token_type(t.token_type), is_error(t.is_error) {};
+Token::Token(const Token& t) : line_location(t.line_location), lexeme(t.lexeme), token_type(t.token_type), is_error(t.is_error), index_start(t.index_start) {};
 
-Token::Token(std::string lexeme, int line_location, Type token_type) 
-	: lexeme(lexeme), line_location(line_location), token_type(token_type), is_error(is_error_token_type(token_type)) {}
+Token::Token(std::string lexeme, int line_location, Type token_type, int index_start)
+	: lexeme(lexeme), line_location(line_location), token_type(token_type), is_error(is_error_token_type(token_type)), index_start(index_start) {}
 
 std::string Token::get_string(Type type) { return token_type_to_string.at(type); }
 

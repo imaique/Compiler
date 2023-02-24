@@ -61,15 +61,15 @@ public:
 		EndOfFile,
 	};
 
-	Token(std::string lexeme, int line_location, Type token_type);
+	Token(std::string lexeme, int line_location, Type token_type, int index_start);
 	Token(const Token&);
-
 	
 
 	friend std::ostream& operator<<(std::ostream& os, const Token& t);
 
 	std::string lexeme;
 	int line_location;
+	int index_start;
 	Type token_type;
 	bool is_error;
 
