@@ -1,0 +1,76 @@
+statement -> reptidnest 'id' reptindice assignOp expr ';' 
+statement -> reptidnest 'id' '(' aParams ')' ';' 
+statement -> 'if' '(' relExpr ')' 'then' statBlock 'else' statBlock ';' 
+statement -> 'while' '(' relExpr ')' statBlock ';' 
+statement -> 'read' '(' variable ')' ';' 
+statement -> 'write' '(' expr ')' ';' 
+statement -> 'return' '(' expr ')' ';' 
+
+factor -> variable 
+factor -> functionCall 
+factor -> 'intnum' 
+factor -> 'floatnum' 
+factor -> '(' arithExpr ')' 
+factor -> 'not' factor 
+factor -> sign factor 
+
+assignStat -> variable assignOp expr 
+
+variable -> reptidnest 'id' reptindice 
+
+functionCall -> reptidnest 'id' '(' aParams ')' 
+
+relExpr -> arithExpr relOp arithExpr 
+
+arithExpr -> term rightrec-arithExpr 
+
+statBlock -> '{' rept-statBlock1 '}' 
+statBlock -> statement 
+statBlock -> EPSILON 
+
+rept-statBlock1 -> statement rept-statBlock1 
+rept-statBlock1 -> EPSILON 
+
+term -> factor rightrec-term 
+
+rightrec-term -> EPSILON 
+rightrec-term -> multOp factor rightrec-term 
+
+assignOp -> '=' 
+
+variable -> reptidnest 'id' reptindice 
+
+reptindice -> indice reptindice 
+reptindice -> EPSILON 
+
+indice -> '[' arithExpr ']' 
+
+reptidnest -> idnest reptidnest 
+reptidnest -> EPSILON 
+
+rightrec-arithExpr -> EPSILON 
+rightrec-arithExpr -> addOp term rightrec-arithExpr 
+
+addOp -> '+' 
+addOp -> '-' 
+addOp -> 'or' 
+
+sign -> '+' 
+sign -> '-' 
+
+multOp -> '*' 
+multOp -> '/' 
+multOp -> 'and' 
+
+relOp -> 'eq' 
+relOp -> 'neq' 
+relOp -> 'lt' 
+relOp -> 'gt' 
+relOp -> 'leq' 
+relOp -> 'geq' 
+
+expr -> arithExpr 
+expr -> relExpr 
+
+idnest -> 'id' reptindice '.' 
+idnest -> 'id' '(' aParams ')' '.' 
