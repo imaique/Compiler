@@ -29,9 +29,11 @@ void LexicalAnalyzer::increment_line() {
 
 
 Token LexicalAnalyzer::get_next_token() {
-	if (!has_next_token()) return Token("", line_number, TT::EndOfFile);
+	if (!has_next_token()) return Token("", line_number, TT::EndOfFile, 0);
 	this->state = State::get_state(1);
 	std::stringstream token_stream;
+
+	int index_start = index;
 
 	const int location = line_number;
 
@@ -71,7 +73,7 @@ Token LexicalAnalyzer::get_next_token() {
 	if (token_type == TT::LineComment) lexeme = lexeme.substr(0, lexeme.size() - 2);
 	else if (token_type == TT::ID && Token::is_reserved_word(lexeme)) token_type = Token::get_reserved_type(lexeme);
 
-	Token token(lexeme, location, token_type);
+	Token token(lexeme, location, token_type, index_start);
 
 	print_token(token);
 
