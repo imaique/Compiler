@@ -6,12 +6,12 @@
 
 
 int main() {
-    std::vector<std::string> test_files{ "lexpositivegrading" , "lexnegativegrading", "example-polynomial", "example-bubblesort", "edge-cases" };
+    std::vector<std::string> test_files{ "example-polynomial", "example-bubblesort" };
 
     for (auto filename : test_files) {
         std::string source_file = "input/" + filename + ".src";
         if (std::filesystem::exists(source_file)) {
-            Parser parser = Parser(filename);
+             Parser parser = Parser(filename);
             parser.parse();
         }
         else {
