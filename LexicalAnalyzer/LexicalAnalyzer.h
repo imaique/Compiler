@@ -23,6 +23,7 @@ class LexicalAnalyzer {
 	void increment_index();
 	void skip_empty_lines();
 	void print_token(Token token);
+	void trim();
 public:
 	LexicalAnalyzer(std::string);
 

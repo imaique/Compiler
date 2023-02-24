@@ -20,6 +20,7 @@ LexicalAnalyzer::LexicalAnalyzer(string filename) {
 void LexicalAnalyzer::increment_line() {
 	index = 0;
 	line_number++;
+	trim();
 	/*
 	token_file << std::endl;
 	error_file << std::endl;
@@ -94,9 +95,14 @@ void LexicalAnalyzer::print_token(Token token) {
 	}
 }
 
+void LexicalAnalyzer::trim() {
+	while (index < line.size() && (line[index] == ' ' || line[index] == '\t' || line[index] == '\n')) index++;
+}
+
 void LexicalAnalyzer::skip_empty_lines() {
 	// trim starting whitespace
-	while (index < line.size() && (line[index] == ' ' || line[index] == '\t' || line[index] == '\n')) index++;
+	trim();
+	
 	while (index >= line.size() && std::getline(input_file, line)) {
 		increment_line();
 	}
