@@ -28,7 +28,6 @@ public:
 	void skip_errors(Token&);
 	void inverse_push(std::string);
 	void print_stack();
+	void print_errors(const Token&);
 	Token get_next_token();
-	Token prev = Token("", 1, Token::Type::AND);
-
 };

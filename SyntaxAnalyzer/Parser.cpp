@@ -496,22 +496,58 @@ string Parser::top() {
 	return stack.top();
 }
 
-void Parser::skip_errors(Token& current_token) {
-	if (prev.token_type == current_token.token_type) {
-		current_token = get_next_token();
-		return;
+void Parser::print_errors(const Token& current_token) {
+	std::stringstream ss;
+	ss << "Expected ";
+
+	string grammmar_def = top();
+
+	if (Token::is_token_type(grammmar_def)) {
+		ss << grammmar_def;
 	}
-	prev = current_token;
+	else {
+		auto non_terminal_first_set = first_set_map.at(grammmar_def);
+		unordered_set<string> possible_elements(non_terminal_first_set);
+
+		if (is_nullable(grammmar_def)) {
+			unordered_set<string> follow_set = follow_set_map.at(grammmar_def);
+			possible_elements.insert(follow_set.begin(), follow_set.end());
+		}
+
+		bool first = true;
+		for (string first_element : possible_elements) {
+			if (!first) {
+				ss << ", ";
+			}
+			else {
+				first = false;
+			}
+			ss << first_element;
+		}
+	}
+
+	ss << ". Received " << Token::get_string(current_token.token_type) << " instead on line " 
+		<< current_token.line_location << ", character index " << current_token.index_start << "." << std::endl;
+
+	error_file << ss.str();
+}
+
+void Parser::skip_errors(Token& current_token) {
+
 	std::cout << "syntax error at " << current_token.line_location << " from " << current_token.lexeme << std::endl;
-	error_file << "syntax error at " << current_token.line_location << " from a " << Token::get_string(current_token.token_type) << " (\"" << current_token.lexeme << "\")" << std::endl;
+	//error_file << "syntax error at " << current_token.line_location << " from a " << Token::get_string(current_token.token_type) << " (\"" << current_token.lexeme << "\")" << std::endl;
+
+	print_errors(current_token);
+
 	T token_type = current_token.token_type;
-	if (token_type == T::EndOfFile || in_follow(top(), token_type)) {
+	if (Token::is_token_type(top()) || token_type == T::EndOfFile || in_follow(top(), token_type)) {
 		pop();
 	}
 	else {
-		while (in_first(top(), current_token.token_type) || (is_nullable(top()) && in_follow(top(), current_token.token_type)))
+		while (!(in_first(top(), current_token.token_type) || (is_nullable(top()) && in_follow(top(), current_token.token_type))))
 			current_token = get_next_token();
 	}
+	token_type;
 }
 
 bool Parser::in_first(string s, T token_type) {
