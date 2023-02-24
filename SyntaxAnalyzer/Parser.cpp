@@ -387,8 +387,8 @@ unordered_map<string, unordered_map<string, string>> Parser::initialize_parsing_
 
 
 Parser::Parser(std::string filename) : la(LexicalAnalyzer(filename)), error(false) {
-	derivation_file.open("output/" + filename + ".outderivation");
-	error_file.open("output/" + filename + ".outsyntaxerrors");
+	derivation_file.open("output/outsyntax/" + filename + ".outderivation");
+	error_file.open("output/outsyntax/" + filename + ".outsyntaxerrors");
 }
 
 void Parser::print_stack() {

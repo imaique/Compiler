@@ -5,8 +5,8 @@ typedef std::string string;
 typedef Token::Type TT;
 
 LexicalAnalyzer::LexicalAnalyzer(string filename) {
-	token_file.open("output/" + filename + ".outlextokens");
-	error_file.open("output/" + filename + ".outlexerrors");
+	token_file.open("output/outlex/" + filename + ".outlextokens");
+	error_file.open("output/outlex/" + filename + ".outlexerrors");
 	input_file.open("input/" + filename + ".src");
 
 	state = State::get_state(1);
