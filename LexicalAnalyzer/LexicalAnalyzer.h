@@ -5,10 +5,6 @@
 #include <fstream>
 #include <unordered_set>
 
-class MapAndToken {
-
-};
-
 class LexicalAnalyzer {
 	State* state;
 	int index;
