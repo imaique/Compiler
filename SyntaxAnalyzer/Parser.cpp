@@ -1,4 +1,5 @@
 #include "Parser.h"
+#include "../Semantic/SemanticAnalyzer.h"
 
 #include <sstream>
 
@@ -391,6 +392,11 @@ Parser::Parser(std::string filename) : la(LexicalAnalyzer(filename)), error(fals
 	error_file.open("output/outsyntax/" + filename + ".outsyntaxerrors");
 }
 
+Parser::Parser(std::string filename, SemanticAnalyzer* s_a) : la(LexicalAnalyzer(filename)), error(false), semantic_analyzer(s_a) {
+	derivation_file.open("output/outsyntax/" + filename + ".outderivation");
+	error_file.open("output/outsyntax/" + filename + ".outsyntaxerrors");
+}
+
 void Parser::print_stack() {
 	std::stringstream ss;
 	ss << left_side;
@@ -410,30 +416,22 @@ bool Parser::parse() {
 	stack.push("START");
 
 	Token current_token = get_next_token();
-
-	int line_temp = 1;
+	Token previous_token = current_token;
 
 	while (stack.top() != "$") { //&& current_token.token_type != Token::Type::EndOfFile) {
 		string top = stack.top();
 
 		string current_token_string_type = Token::get_string(current_token.token_type);
 
-		std::cout << current_token_string_type << std::endl;
-
-		if (line_temp != current_token.line_location) {
-			std::cout << current_token.line_location << std::endl;
-			line_temp = current_token.line_location;
+		if (semantic_analyzer && semantic_analyzer->perform_semantic_action(top, previous_token)) {
+			stack.pop();
 		}
-
-		if (line_temp == 13) {
-			std::cout << "";
-		}
-
-		if (Token::is_token_type(top)) {
+		else if (Token::is_token_type(top)) {
 			if (top == current_token_string_type) {
 				stack.pop();
 				left_side += current_token_string_type + " ";
 				print_stack();
+				previous_token = current_token;
 				current_token = get_next_token();
 			}
 			else {
