@@ -3,6 +3,8 @@
 #include "../LexicalAnalyzer/LexicalAnalyzer.h"
 #include <stack>
 
+class SemanticAnalyzer;
+
 using std::string;
 class Parser {
 private:
@@ -12,12 +14,14 @@ private:
 	std::ofstream derivation_file;
 	std::ofstream error_file;
 	string left_side = "";
+	SemanticAnalyzer* semantic_analyzer;
 public:
 	static const std::unordered_map<std::string, std::unordered_map<std::string, std::string>> parsing_map;
 	static const std::unordered_map<std::string, std::unordered_set<std::string>> first_set_map;
 	static const std::unordered_map<std::string, std::unordered_set<std::string>> follow_set_map;
 	static const std::unordered_set<std::string> nullable_set;
 	Parser(std::string filename);
+	Parser(std::string filename, SemanticAnalyzer* s_a);
 	std::stack<std::string> stack;
 	bool parse();
 	void pop();
