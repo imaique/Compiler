@@ -1,0 +1,3 @@
+function f1(arr: integer[], arr2: integer[1][2], size: float, name: id) => void
+{
+}
