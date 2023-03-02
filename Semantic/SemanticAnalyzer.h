@@ -1,9 +1,6 @@
 #pragma once
 #include "../SyntaxAnalyzer/Parser.h"
 #include <stack>
-#include <unordered_map>
-#include <unordered_set>
-
 
 class AST {
 public:
@@ -21,13 +18,9 @@ public:
 
 class SemanticAnalyzer {
 private:
-	static const std::unordered_map<std::string, std::unordered_map<std::string, int>> m_trees;
-	static const std::unordered_set<std::string> m_leaves;
-	Parser* parser;
-	void add_top(std::vector<AST*>& children);
-	bool top_in_shape(std::unordered_map<std::string, int>& current_shape);
-public:
 	std::stack<AST*> m_stack;
+	Parser* parser;
+public:
 	AST* get_AST();
 	SemanticAnalyzer(std::string filename);
 	bool perform_semantic_action(std::string action, const Token& token);
