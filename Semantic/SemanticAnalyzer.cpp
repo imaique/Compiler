@@ -43,23 +43,21 @@ string AST::get_type() {
 bool SemanticAnalyzer::perform_semantic_action(std::string action, const Token& token) {
 	if (action[1] != '_') return false;
 
-	string trash;
 	string leaf;
 	string type;
 	
 
 	stringstream ss(action);
 
-	getline(ss, trash, '_');
 	getline(ss, leaf, '_');
 	getline(ss, type, '_');
 
 	AST* new_node = nullptr;
 
-	if (leaf == "stop") {
+	if (type == "stop") {
 		// push nullptr automatically from above
 	}
-	else if (leaf == "leaf") {
+	else if (leaf == "l") {
 		new_node = new AST(type, token.lexeme);
 	}
 	else {
