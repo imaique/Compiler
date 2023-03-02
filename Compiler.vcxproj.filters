@@ -30,10 +30,10 @@
     <ClCompile Include="Semantic\SemanticAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Semantic\Source.cpp">
+    <ClCompile Include="ASTdriver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ASTdriver.cpp">
+    <ClCompile Include="Utils\utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
