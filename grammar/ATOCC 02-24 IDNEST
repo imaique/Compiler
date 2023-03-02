@@ -1,10 +1,31 @@
-statement -> reptidnest 'id' reptindice assignOp expr ';' 
-statement -> reptidnest 'id' '(' aParams ')' ';' 
+statement -> statementTail
 statement -> 'if' '(' relExpr ')' 'then' statBlock 'else' statBlock ';' 
 statement -> 'while' '(' relExpr ')' statBlock ';' 
 statement -> 'read' '(' variable ')' ';' 
 statement -> 'write' '(' expr ')' ';' 
 statement -> 'return' '(' expr ')' ';' 
+
+statementTail -> experiment reptindice assignOp expr ';' 
+statementTail -> stateFuncCall
+
+stateFuncCall -> 'id' '(' aParams ')' '.' stateFuncCall
+stateFuncCall -> 'id' reptindice '.' stateFuncCall
+stateFuncCall -> 'id' '.' stateFuncCall
+stateFuncCall -> 'id' ';'
+stateFuncCall -> 'id' '(' aParams ')' ';'
+
+stateVariable -> 'id' '(' aParams ')' '.' stateVariable
+stateVariable -> 'id' reptindice '.' stateVariable
+stateVariable -> 'id' '.' stateVariable
+stateVariable -> 'id' assignOp
+stateVariable -> 'id' reptindice assignOp
+
+experiment -> 'id' extend
+
+extend -> indice reptindice  '.' experiment
+extend -> '(' aParams ')' '.' experiment
+extend -> '.' experiment
+extend -> EPSILON
 
 factor -> variable 
 factor -> functionCall 
@@ -16,9 +37,14 @@ factor -> sign factor
 
 assignStat -> variable assignOp expr 
 
-variable -> reptidnest 'id' reptindice 
+variable -> experiment reptindice 
 
-functionCall -> reptidnest 'id' '(' aParams ')' 
+functionCall -> experiment '(' aParams ')'  
+
+expr -> arithExpr exprTail
+
+exprTail -> EPSILON
+exprTail -> relOp arithExpr 
 
 relExpr -> arithExpr relOp arithExpr 
 
@@ -38,7 +64,7 @@ rightrec-term -> multOp factor rightrec-term
 
 assignOp -> '=' 
 
-variable -> reptidnest 'id' reptindice 
+variable -> experiment reptindice 
 
 reptindice -> indice reptindice 
 reptindice -> EPSILON 
@@ -67,10 +93,9 @@ relOp -> 'neq'
 relOp -> 'lt' 
 relOp -> 'gt' 
 relOp -> 'leq' 
-relOp -> 'geq' 
+relOp -> 'geq'
 
-expr -> arithExpr 
-expr -> relExpr 
+idnest -> 'id' idnestTail
 
-idnest -> 'id' reptindice '.' 
-idnest -> 'id' '(' aParams ')' '.' 
+idnestTail -> reptindice '.' 
+idnestTail -> '(' aParams ')' '.' 

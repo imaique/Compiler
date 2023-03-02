@@ -1,34 +1,39 @@
 ﻿nonterminal,first set,follow set,nullable,endable
 START,eof class function,∅,no,yes
-ARRAYSIZE2,intnum rsqbr,lsqbr rpar comma semi,no,no
+ARRAYSIZE2,rsqbr intnum,lsqbr rpar comma semi,no,no
 CLASSDECL,class,class function eof,no,no
 EXPR2,eq neq lt gt leq geq,semi comma rpar,yes,no
+INTNUM,intnum,semi mult div and eq neq lt gt leq geq rsqbr plus minus or comma rpar,no,no
 FACTOR2,lpar lsqbr,semi mult div and dot rsqbr eq neq lt gt leq geq plus minus or comma rpar,yes,no
 FUNCDEF,function,class function eof,no,no
 FUNCBODY,lcurbr,class function eof,no,no
 FUNCHEAD,function,lcurbr,no,no
+FPARAMS,id,rpar,yes,no
 FUNCHEADTAIL,sr lpar,lcurbr,no,no
-FUNCHEADMEMBERTAIL,id constructorkeyword,lcurbr,no,no
+FUNCHEADMEMBERTAIL,constructorkeyword id,lcurbr,no,no
 IDNEST2,lpar lsqbr,semi mult div and dot rsqbr eq neq lt gt leq geq plus minus or comma rpar,yes,no
 ARRAYOROBJECT,lpar lsqbr,semi,yes,no
-LOCALVARDECL,localvar,localvar id if while read write return rcurbr,no,no
+LOCALVARDECL,localvar,localvar if while read write return id rcurbr,no,no
 MEMBERFUNCDECL,function constructorkeyword,public private rcurbr,no,no
 MEMBERFUNCHEAD,function constructorkeyword,semi,no,no
-FPARAMS,id,rpar,yes,no
+ARROWRETURNTYPE,arrow,semi lcurbr,no,no
+PARAMLIST,lpar,semi arrow lcurbr,no,no
 MEMBERVARDECL,attribute,public private rcurbr,no,no
+VARDECL,id,rpar comma lpar lsqbr semi,no,no
 OPTINHERITS,isa,lcurbr,yes,no
 PROG,class function,eof,yes,no
-ARITHEXPR,id intnum floatnum lpar not plus minus,semi rsqbr eq neq lt gt leq geq comma rpar,no,no
-RELOP,eq neq lt gt leq geq,id intnum floatnum lpar not plus minus,no,no
-APARAMSTAIL,comma,comma rpar,no,no
+ARITHEXPR,floatnum lpar not id intnum plus minus,semi rsqbr eq neq lt gt leq geq comma rpar,no,no
+RELOPOP,eq neq lt gt leq geq,floatnum lpar not id intnum plus minus,no,no
+RELOP,eq neq lt gt leq geq,floatnum lpar not id intnum plus minus,no,no
+APARAMSTAIL,comma,rpar comma,no,no
 REPTAPARAMS1,comma,rpar,yes,no
 ARRAYSIZE,lsqbr,lsqbr rpar comma semi,no,no
 REPTARRAYSIZE,lsqbr,rpar comma semi,yes,no
 FPARAMSTAIL,comma,comma rpar,no,no
 REPTFPARAMS4,comma,rpar,yes,no
 REPTINHERITSLIST,comma,lcurbr,yes,no
-LOCALVARORSTAT,localvar id if while read write return,localvar id if while read write return rcurbr,no,no
-REPTLOCALVARORSTAT,localvar id if while read write return,rcurbr,yes,no
+LOCALVARORSTAT,localvar if while read write return id,localvar if while read write return id rcurbr,no,no
+REPTLOCALVARORSTAT,localvar if while read write return id,rcurbr,yes,no
 MEMBERDECL,attribute function constructorkeyword,public private rcurbr,no,no
 REPTMEMBERDECL,public private,rcurbr,yes,no
 CLASSDECLORFUNCDEF,class function,class function eof,no,no
@@ -36,29 +41,36 @@ REPTPROG0,class function,eof,yes,no
 IDNEST,dot,semi mult div and dot rsqbr eq neq lt gt leq geq plus minus or comma rpar,no,no
 REPTVARIABLEORFUNCTIONCALL,dot,semi mult div and rsqbr eq neq lt gt leq geq plus minus or comma rpar,yes,no
 RETURNTYPE,void integer float id,semi lcurbr,no,no
-ADDOP,plus minus or,id intnum floatnum lpar not plus minus,no,no
+ADDOP,plus minus or,floatnum lpar not id intnum plus minus,no,no
 RIGHTRECARITHEXPR,plus minus or,semi rsqbr eq neq lt gt leq geq comma rpar,yes,no
-MULTOP,mult div and,id intnum floatnum lpar not plus minus,no,no
-SIGN,plus minus,id intnum floatnum lpar not plus minus,no,no
-REPTSTATBLOCK1,id if while read write return,rcurbr,yes,no
-STATEMENT,id if while read write return,else semi localvar id if while read write return rcurbr,no,no
-RELEXPR,id intnum floatnum lpar not plus minus,rpar,no,no
-STATBLOCK,lcurbr id if while read write return,else semi,yes,no
+MULTOP,mult div and,floatnum lpar not id intnum plus minus,no,no
+SIGN,plus minus,floatnum lpar not id intnum plus minus,no,no
+REPTSTATBLOCK1,if while read write return id,rcurbr,yes,no
+STATBLOCK,lcurbr if while read write return id,else semi,yes,no
+STATEMENT,if while read write return id,else semi localvar if while read write return id rcurbr,no,no
+STATEMENTBLOCK,lcurbr if while read write return id,else semi,yes,no
+RELEXPRPAR,lpar,then lcurbr if while read write return id semi,no,no
+RELEXPR,floatnum lpar not id intnum plus minus,rpar,no,no
+EXPRPAR,lpar,semi,no,no
 INDICE,lsqbr,semi mult div and lsqbr assign dot rsqbr eq neq lt gt leq geq plus minus or comma rpar,no,no
 STATEMENTIDNEST2,dot,semi,yes,no
-STATEMENTIDNEST3,dot assign,semi,no,no
-ASSIGNOP,assign,id intnum floatnum lpar not plus minus,no,no
-EXPR,id intnum floatnum lpar not plus minus,semi comma rpar,no,no
+STATEMENTIDNEST3,assign dot,semi,no,no
+ASSIGNOP,assign,floatnum lpar not id intnum plus minus,no,no
+EXPR,floatnum lpar not id intnum plus minus,semi comma rpar,no,no
+DOTIDSTATEMENTIDNEST,dot,semi,no,no
 STATEMENTIDNEST,dot lpar lsqbr assign,semi,no,no
-TERM,id intnum floatnum lpar not plus minus,semi rsqbr eq neq lt gt leq geq plus minus or comma rpar,no,no
-FACTOR,id intnum floatnum lpar not plus minus,semi mult div and rsqbr eq neq lt gt leq geq plus minus or comma rpar,no,no
+TERM,floatnum lpar not id intnum plus minus,semi rsqbr eq neq lt gt leq geq plus minus or comma rpar,no,no
+FACTOR,floatnum lpar not id intnum plus minus,semi mult div and rsqbr eq neq lt gt leq geq plus minus or comma rpar,no,no
 RIGHTRECTERM,mult div and,semi rsqbr eq neq lt gt leq geq plus minus or comma rpar,yes,no
 TYPE,integer float id,rpar lcurbr comma lpar lsqbr semi,no,no
 VARIABLE,id,rpar,no,no
-VARIABLE2,lpar lsqbr dot,rpar,yes,no
+VARIABLE2,lsqbr dot lpar,rpar,yes,no
 REPTVARIABLE,dot,rpar,yes,no
-VARIDNEST2,lpar lsqbr,rpar dot,yes,no
-APARAMS,id intnum floatnum lpar not plus minus,rpar,yes,no
+ID,id,mult div and semi rsqbr eq neq lt gt leq geq isa lcurbr sr colon assign dot lpar lsqbr plus minus or comma rpar,no,no
+APARAMS,floatnum lpar not id intnum plus minus,rpar,yes,no
+APARAMSLIST,lpar,mult div and semi dot rsqbr eq neq lt gt leq geq plus minus or comma rpar,no,no
 VARIDNEST,dot,rpar dot,no,no
+VARIDNEST2,lpar lsqbr,rpar dot,yes,no
+APARAMSLISTIDNEST,lpar,rpar dot,no,no
 REPTIDNEST1,lsqbr,assign semi mult div and dot rsqbr eq neq lt gt leq geq plus minus or comma rpar,yes,no
 VISIBILITY,public private,attribute function constructorkeyword,no,no

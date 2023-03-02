@@ -1,12 +1,15 @@
 import csv
 
 def remove_arrow(string):
+   
    index = string.find('?')
-   return string[index+2:]
+   arrowless = string[index+2:]
+   if arrowless[0] == '&':
+      return ""
+   return arrowless
 
 rows = []
 rules_list = []
-rules = {}
 with open("data.csv", 'r') as file:
   csvreader = csv.reader(file)
   columns = next(csvreader)
@@ -18,6 +21,9 @@ with open("data.csv", 'r') as file:
       string = "{"
       string += f'\"{rowhead}\", '
       string += "{"
+
+      rules = {}
+
       for index, value in enumerate(row[1:], 1):
          
          if value == "":
@@ -27,10 +33,11 @@ with open("data.csv", 'r') as file:
          rule = ""
          arrowless = remove_arrow(value)
 
+
          if arrowless in rules:
             rule = rules[arrowless]
          else:
-            rule = f'r{len(rules) + 1}'
+            rule = f'r{len(rules_list) + 1}'
             rules[arrowless] = rule
             rules_list.append(arrowless)
 

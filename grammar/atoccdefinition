@@ -177,7 +177,7 @@ indice -> '[' arithExpr ']'
 
 variableBrack -> EPSILON | pointnestr rept-indice
 
-pointnestr -> '.' rept-idnestr 'id'
+pointnestr -> '.' rept-idnestr
 
 rept-idnestr -> 'id' rept-idnestrTail
 
