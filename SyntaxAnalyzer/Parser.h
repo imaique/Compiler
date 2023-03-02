@@ -10,12 +10,13 @@ class Parser {
 private:
 	static std::unordered_map<std::string, std::unordered_map<std::string, std::string>> initialize_parsing_map();
 	LexicalAnalyzer la;
-	bool error;
+	
 	std::ofstream derivation_file;
 	std::ofstream error_file;
 	string left_side = "";
 	SemanticAnalyzer* semantic_analyzer;
 public:
+	bool error;
 	static const std::unordered_map<std::string, std::unordered_map<std::string, std::string>> parsing_map;
 	static const std::unordered_map<std::string, std::unordered_set<std::string>> first_set_map;
 	static const std::unordered_map<std::string, std::unordered_set<std::string>> follow_set_map;

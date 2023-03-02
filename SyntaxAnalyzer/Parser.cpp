@@ -12,25 +12,30 @@ typedef const string cs;
 
 const unordered_map<string, unordered_set<string>> Parser::first_set_map = {
 {"START", {"eof", "class", "function"}},
-{"ARRAYSIZE2", {"intnum", "rsqbr"}},
+{"ARRAYSIZE2", {"rsqbr", "intnum"}},
 {"CLASSDECL", {"class"}},
 {"EXPR2", {"eq", "neq", "lt", "gt", "leq", "geq"}},
+{"INTNUM", {"intnum"}},
 {"FACTOR2", {"lpar", "lsqbr"}},
 {"FUNCDEF", {"function"}},
 {"FUNCBODY", {"lcurbr"}},
 {"FUNCHEAD", {"function"}},
+{"FPARAMS", {"id"}},
 {"FUNCHEADTAIL", {"sr", "lpar"}},
-{"FUNCHEADMEMBERTAIL", {"id", "constructorkeyword"}},
+{"FUNCHEADMEMBERTAIL", {"constructorkeyword", "id"}},
 {"IDNEST2", {"lpar", "lsqbr"}},
 {"ARRAYOROBJECT", {"lpar", "lsqbr"}},
 {"LOCALVARDECL", {"localvar"}},
 {"MEMBERFUNCDECL", {"function", "constructorkeyword"}},
 {"MEMBERFUNCHEAD", {"function", "constructorkeyword"}},
-{"FPARAMS", {"id"}},
+{"ARROWRETURNTYPE", {"arrow"}},
+{"PARAMLIST", {"lpar"}},
 {"MEMBERVARDECL", {"attribute"}},
+{"VARDECL", {"id"}},
 {"OPTINHERITS", {"isa"}},
 {"PROG", {"class", "function"}},
-{"ARITHEXPR", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
+{"ARITHEXPR", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
+{"RELOPOP", {"eq", "neq", "lt", "gt", "leq", "geq"}},
 {"RELOP", {"eq", "neq", "lt", "gt", "leq", "geq"}},
 {"APARAMSTAIL", {"comma"}},
 {"REPTAPARAMS1", {"comma"}},
@@ -39,8 +44,8 @@ const unordered_map<string, unordered_set<string>> Parser::first_set_map = {
 {"FPARAMSTAIL", {"comma"}},
 {"REPTFPARAMS4", {"comma"}},
 {"REPTINHERITSLIST", {"comma"}},
-{"LOCALVARORSTAT", {"localvar", "id", "if", "while", "read", "write", "return"}},
-{"REPTLOCALVARORSTAT", {"localvar", "id", "if", "while", "read", "write", "return"}},
+{"LOCALVARORSTAT", {"localvar", "if", "while", "read", "write", "return", "id"}},
+{"REPTLOCALVARORSTAT", {"localvar", "if", "while", "read", "write", "return", "id"}},
 {"MEMBERDECL", {"attribute", "function", "constructorkeyword"}},
 {"REPTMEMBERDECL", {"public", "private"}},
 {"CLASSDECLORFUNCDEF", {"class", "function"}},
@@ -52,26 +57,33 @@ const unordered_map<string, unordered_set<string>> Parser::first_set_map = {
 {"RIGHTRECARITHEXPR", {"plus", "minus", "or"}},
 {"MULTOP", {"mult", "div", "and"}},
 {"SIGN", {"plus", "minus"}},
-{"REPTSTATBLOCK1", {"id", "if", "while", "read", "write", "return"}},
-{"STATEMENT", {"id", "if", "while", "read", "write", "return"}},
-{"RELEXPR", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
-{"STATBLOCK", {"lcurbr", "id", "if", "while", "read", "write", "return"}},
+{"REPTSTATBLOCK1", {"if", "while", "read", "write", "return", "id"}},
+{"STATBLOCK", {"lcurbr", "if", "while", "read", "write", "return", "id"}},
+{"STATEMENT", {"if", "while", "read", "write", "return", "id"}},
+{"STATEMENTBLOCK", {"lcurbr", "if", "while", "read", "write", "return", "id"}},
+{"RELEXPRPAR", {"lpar"}},
+{"RELEXPR", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
+{"EXPRPAR", {"lpar"}},
 {"INDICE", {"lsqbr"}},
 {"STATEMENTIDNEST2", {"dot"}},
-{"STATEMENTIDNEST3", {"dot", "assign"}},
+{"STATEMENTIDNEST3", {"assign", "dot"}},
 {"ASSIGNOP", {"assign"}},
-{"EXPR", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
+{"EXPR", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
+{"DOTIDSTATEMENTIDNEST", {"dot"}},
 {"STATEMENTIDNEST", {"dot", "lpar", "lsqbr", "assign"}},
-{"TERM", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
-{"FACTOR", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
+{"TERM", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
+{"FACTOR", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
 {"RIGHTRECTERM", {"mult", "div", "and"}},
 {"TYPE", {"integer", "float", "id"}},
 {"VARIABLE", {"id"}},
-{"VARIABLE2", {"lpar", "lsqbr", "dot"}},
+{"VARIABLE2", {"lsqbr", "dot", "lpar"}},
 {"REPTVARIABLE", {"dot"}},
-{"VARIDNEST2", {"lpar", "lsqbr"}},
-{"APARAMS", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
+{"ID", {"id"}},
+{"APARAMS", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
+{"APARAMSLIST", {"lpar"}},
 {"VARIDNEST", {"dot"}},
+{"VARIDNEST2", {"lpar", "lsqbr"}},
+{"APARAMSLISTIDNEST", {"lpar"}},
 {"REPTIDNEST1", {"lsqbr"}},
 {"VISIBILITY", {"public", "private"}},
 };
@@ -80,31 +92,36 @@ const unordered_map<string, unordered_set<string>> Parser::follow_set_map = {
 {"ARRAYSIZE2", {"lsqbr", "rpar", "comma", "semi"}},
 {"CLASSDECL", {"class", "function", "eof"}},
 {"EXPR2", {"semi", "comma", "rpar"}},
+{"INTNUM", {"semi", "mult", "div", "and", "eq", "neq", "lt", "gt", "leq", "geq", "rsqbr", "plus", "minus", "or", "comma", "rpar"}},
 {"FACTOR2", {"semi", "mult", "div", "and", "dot", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "rpar"}},
 {"FUNCDEF", {"class", "function", "eof"}},
 {"FUNCBODY", {"class", "function", "eof"}},
 {"FUNCHEAD", {"lcurbr"}},
+{"FPARAMS", {"rpar"}},
 {"FUNCHEADTAIL", {"lcurbr"}},
 {"FUNCHEADMEMBERTAIL", {"lcurbr"}},
 {"IDNEST2", {"semi", "mult", "div", "and", "dot", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "rpar"}},
 {"ARRAYOROBJECT", {"semi"}},
-{"LOCALVARDECL", {"localvar", "id", "if", "while", "read", "write", "return", "rcurbr"}},
+{"LOCALVARDECL", {"localvar", "if", "while", "read", "write", "return", "id", "rcurbr"}},
 {"MEMBERFUNCDECL", {"public", "private", "rcurbr"}},
 {"MEMBERFUNCHEAD", {"semi"}},
-{"FPARAMS", {"rpar"}},
+{"ARROWRETURNTYPE", {"semi", "lcurbr"}},
+{"PARAMLIST", {"semi", "arrow", "lcurbr"}},
 {"MEMBERVARDECL", {"public", "private", "rcurbr"}},
+{"VARDECL", {"rpar", "comma", "lpar", "lsqbr", "semi"}},
 {"OPTINHERITS", {"lcurbr"}},
 {"PROG", {"eof"}},
 {"ARITHEXPR", {"semi", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "comma", "rpar"}},
-{"RELOP", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
-{"APARAMSTAIL", {"comma", "rpar"}},
+{"RELOPOP", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
+{"RELOP", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
+{"APARAMSTAIL", {"rpar", "comma"}},
 {"REPTAPARAMS1", {"rpar"}},
 {"ARRAYSIZE", {"lsqbr", "rpar", "comma", "semi"}},
 {"REPTARRAYSIZE", {"rpar", "comma", "semi"}},
 {"FPARAMSTAIL", {"comma", "rpar"}},
 {"REPTFPARAMS4", {"rpar"}},
 {"REPTINHERITSLIST", {"lcurbr"}},
-{"LOCALVARORSTAT", {"localvar", "id", "if", "while", "read", "write", "return", "rcurbr"}},
+{"LOCALVARORSTAT", {"localvar", "if", "while", "read", "write", "return", "id", "rcurbr"}},
 {"REPTLOCALVARORSTAT", {"rcurbr"}},
 {"MEMBERDECL", {"public", "private", "rcurbr"}},
 {"REPTMEMBERDECL", {"rcurbr"}},
@@ -113,19 +130,23 @@ const unordered_map<string, unordered_set<string>> Parser::follow_set_map = {
 {"IDNEST", {"semi", "mult", "div", "and", "dot", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "rpar"}},
 {"REPTVARIABLEORFUNCTIONCALL", {"semi", "mult", "div", "and", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "rpar"}},
 {"RETURNTYPE", {"semi", "lcurbr"}},
-{"ADDOP", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
+{"ADDOP", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
 {"RIGHTRECARITHEXPR", {"semi", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "comma", "rpar"}},
-{"MULTOP", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
-{"SIGN", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
+{"MULTOP", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
+{"SIGN", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
 {"REPTSTATBLOCK1", {"rcurbr"}},
-{"STATEMENT", {"else", "semi", "localvar", "id", "if", "while", "read", "write", "return", "rcurbr"}},
-{"RELEXPR", {"rpar"}},
 {"STATBLOCK", {"else", "semi"}},
+{"STATEMENT", {"else", "semi", "localvar", "if", "while", "read", "write", "return", "id", "rcurbr"}},
+{"STATEMENTBLOCK", {"else", "semi"}},
+{"RELEXPRPAR", {"then", "lcurbr", "if", "while", "read", "write", "return", "id", "semi"}},
+{"RELEXPR", {"rpar"}},
+{"EXPRPAR", {"semi"}},
 {"INDICE", {"semi", "mult", "div", "and", "lsqbr", "assign", "dot", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "rpar"}},
 {"STATEMENTIDNEST2", {"semi"}},
 {"STATEMENTIDNEST3", {"semi"}},
-{"ASSIGNOP", {"id", "intnum", "floatnum", "lpar", "not", "plus", "minus"}},
+{"ASSIGNOP", {"floatnum", "lpar", "not", "id", "intnum", "plus", "minus"}},
 {"EXPR", {"semi", "comma", "rpar"}},
+{"DOTIDSTATEMENTIDNEST", {"semi"}},
 {"STATEMENTIDNEST", {"semi"}},
 {"TERM", {"semi", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "rpar"}},
 {"FACTOR", {"semi", "mult", "div", "and", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "rpar"}},
@@ -134,18 +155,21 @@ const unordered_map<string, unordered_set<string>> Parser::follow_set_map = {
 {"VARIABLE", {"rpar"}},
 {"VARIABLE2", {"rpar"}},
 {"REPTVARIABLE", {"rpar"}},
-{"VARIDNEST2", {"rpar", "dot"}},
+{"ID", {"mult", "div", "and", "semi", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "isa", "lcurbr", "sr", "colon", "assign", "dot", "lpar", "lsqbr", "plus", "minus", "or", "comma", "rpar"}},
 {"APARAMS", {"rpar"}},
+{"APARAMSLIST", {"mult", "div", "and", "semi", "dot", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "rpar"}},
 {"VARIDNEST", {"rpar", "dot"}},
+{"VARIDNEST2", {"rpar", "dot"}},
+{"APARAMSLISTIDNEST", {"rpar", "dot"}},
 {"REPTIDNEST1", {"assign", "semi", "mult", "div", "and", "dot", "rsqbr", "eq", "neq", "lt", "gt", "leq", "geq", "plus", "minus", "or", "comma", "rpar"}},
 {"VISIBILITY", {"attribute", "function", "constructorkeyword"}},
 };
 
 const unordered_set<string> Parser::nullable_set = {
 "FACTOR2",
+"FPARAMS",
 "IDNEST2",
 "ARRAYOROBJECT",
-"FPARAMS",
 "OPTINHERITS",
 "PROG",
 "REPTAPARAMS1",
@@ -159,12 +183,13 @@ const unordered_set<string> Parser::nullable_set = {
 "RIGHTRECARITHEXPR",
 "REPTSTATBLOCK1",
 "STATBLOCK",
+"STATEMENTBLOCK",
 "STATEMENTIDNEST2",
 "RIGHTRECTERM",
 "VARIABLE2",
 "REPTVARIABLE",
-"VARIDNEST2",
 "APARAMS",
+"VARIDNEST2",
 "REPTIDNEST1",
 };
 
@@ -175,96 +200,137 @@ unordered_map<string, unordered_map<string, string>> Parser::initialize_parsing_
 	cs r2 = "minus";
 	cs r3 = "plus";
 	cs r4 = "or";
-	cs r5 = "&epsilon";
+	cs r5 = "";
 	cs r6 = "EXPR REPTAPARAMS1";
 	cs r7 = "comma EXPR";
 	cs r8 = "TERM RIGHTRECARITHEXPR";
-	cs r9 = "lpar APARAMS rpar";
+	cs r9 = "APARAMSLIST";
 	cs r10 = "REPTARRAYSIZE";
 	cs r11 = "lsqbr ARRAYSIZE2";
 	cs r12 = "rsqbr";
-	cs r13 = "intnum rsqbr";
-	cs r14 = "assign";
-	cs r15 = "class id OPTINHERITS lcurbr REPTMEMBERDECL rcurbr semi";
-	cs r16 = "FUNCDEF";
-	cs r17 = "CLASSDECL";
-	cs r18 = "ARITHEXPR EXPR2";
-	cs r19 = "RELOP ARITHEXPR";
-	cs r20 = "lpar ARITHEXPR rpar";
-	cs r21 = "id FACTOR2 REPTVARIABLEORFUNCTIONCALL";
-	cs r22 = "SIGN FACTOR";
-	cs r23 = "not FACTOR";
-	cs r24 = "floatnum";
-	cs r25 = "intnum";
-	cs r26 = "REPTIDNEST1";
-	cs r27 = "id colon TYPE REPTARRAYSIZE REPTFPARAMS4";
-	cs r28 = "comma id colon TYPE REPTARRAYSIZE";
-	cs r29 = "lcurbr REPTLOCALVARORSTAT rcurbr";
-	cs r30 = "FUNCHEAD FUNCBODY";
-	cs r31 = "function id FUNCHEADTAIL";
-	cs r32 = "id lpar FPARAMS rpar arrow RETURNTYPE";
-	cs r33 = "constructorkeyword lpar FPARAMS rpar";
-	cs r34 = "lpar FPARAMS rpar arrow RETURNTYPE";
-	cs r35 = "sr FUNCHEADMEMBERTAIL";
-	cs r36 = "dot id IDNEST2";
-	cs r37 = "lsqbr ARITHEXPR rsqbr";
-	cs r38 = "localvar id colon TYPE ARRAYOROBJECT semi";
-	cs r39 = "STATEMENT";
-	cs r40 = "LOCALVARDECL";
-	cs r41 = "MEMBERVARDECL";
-	cs r42 = "MEMBERFUNCDECL";
-	cs r43 = "MEMBERFUNCHEAD semi";
-	cs r44 = "constructorkeyword colon lpar FPARAMS rpar";
-	cs r45 = "function id colon lpar FPARAMS rpar arrow RETURNTYPE";
-	cs r46 = "attribute id colon TYPE REPTARRAYSIZE semi";
-	cs r47 = "and";
-	cs r48 = "div";
-	cs r49 = "mult";
-	cs r50 = "isa id REPTINHERITSLIST";
-	cs r51 = "REPTPROG0";
-	cs r52 = "ARITHEXPR RELOP ARITHEXPR";
-	cs r53 = "geq";
-	cs r54 = "leq";
-	cs r55 = "gt";
-	cs r56 = "lt";
-	cs r57 = "neq";
-	cs r58 = "eq";
-	cs r59 = "APARAMSTAIL REPTAPARAMS1";
-	cs r60 = "ARRAYSIZE REPTARRAYSIZE";
-	cs r61 = "FPARAMSTAIL REPTFPARAMS4";
-	cs r62 = "INDICE REPTIDNEST1";
-	cs r63 = "comma id REPTINHERITSLIST";
-	cs r64 = "LOCALVARORSTAT REPTLOCALVARORSTAT";
-	cs r65 = "VISIBILITY MEMBERDECL REPTMEMBERDECL";
-	cs r66 = "CLASSDECLORFUNCDEF REPTPROG0";
-	cs r67 = "STATEMENT REPTSTATBLOCK1";
-	cs r68 = "VARIDNEST REPTVARIABLE";
-	cs r69 = "IDNEST REPTVARIABLEORFUNCTIONCALL";
-	cs r70 = "TYPE";
-	cs r71 = "void";
-	cs r72 = "ADDOP TERM RIGHTRECARITHEXPR";
-	cs r73 = "MULTOP FACTOR RIGHTRECTERM";
-	cs r74 = "lcurbr REPTSTATBLOCK1 rcurbr";
-	cs r75 = "id STATEMENTIDNEST semi";
-	cs r76 = "return lpar EXPR rpar semi";
-	cs r77 = "write lpar EXPR rpar semi";
-	cs r78 = "read lpar VARIABLE rpar semi";
-	cs r79 = "while lpar RELEXPR rpar STATBLOCK semi";
-	cs r80 = "if lpar RELEXPR rpar then STATBLOCK else STATBLOCK semi";
-	cs r81 = "lpar APARAMS rpar STATEMENTIDNEST2";
-	cs r82 = "dot id STATEMENTIDNEST";
-	cs r83 = "INDICE REPTIDNEST1 STATEMENTIDNEST3";
-	cs r84 = "ASSIGNOP EXPR";
-	cs r85 = "FACTOR RIGHTRECTERM";
-	cs r86 = "id";
-	cs r87 = "float";
-	cs r88 = "integer";
-	cs r89 = "id VARIABLE2";
-	cs r90 = "REPTIDNEST1 REPTVARIABLE";
-	cs r91 = "lpar APARAMS rpar VARIDNEST";
-	cs r92 = "dot id VARIDNEST2";
-	cs r93 = "private";
-	cs r94 = "public";
+	cs r13 = "INTNUM rsqbr";
+	cs r14 = "intnum _IntNum";
+	cs r15 = "assign";
+	cs r16 = "class ID OPTINHERITS lcurbr REPTMEMBERDECL rcurbr semi";
+	cs r17 = "FUNCDEF _FuncDef";
+	cs r18 = "CLASSDECL";
+	cs r19 = "ARITHEXPR EXPR2";
+	cs r20 = "";
+	cs r21 = "RELOPOP ARITHEXPR _Operation";
+	cs r22 = "lpar ARITHEXPR rpar";
+	cs r23 = "SIGN FACTOR";
+	cs r24 = "ID FACTOR2 REPTVARIABLEORFUNCTIONCALL _Dot";
+	cs r25 = "not FACTOR";
+	cs r26 = "floatnum _FloatNum";
+	cs r27 = "INTNUM";
+	cs r28 = "REPTIDNEST1 _Variable";
+	cs r29 = "APARAMSLIST _FuncCall";
+	cs r30 = "";
+	cs r31 = "VARDECL REPTARRAYSIZE _DimList _VarDecl REPTFPARAMS4";
+	cs r32 = "comma VARDECL REPTARRAYSIZE _DimList _VarDecl";
+	cs r33 = "lcurbr REPTLOCALVARORSTAT _StatBlock rcurbr";
+	cs r34 = "FUNCHEAD FUNCBODY";
+	cs r35 = "function _Scope ID FUNCHEADTAIL";
+	cs r36 = "lpar FPARAMS _ParamList rpar";
+	cs r37 = "ID PARAMLIST ARROWRETURNTYPE";
+	cs r38 = "constructorkeyword PARAMLIST";
+	cs r39 = "PARAMLIST ARROWRETURNTYPE";
+	cs r40 = "sr FUNCHEADMEMBERTAIL";
+	cs r41 = "arrow RETURNTYPE";
+	cs r42 = "dot ID IDNEST2";
+	cs r43 = "REPTIDNEST1 _Variable";
+	cs r44 = "APARAMSLIST _FuncCall";
+	cs r45 = "lsqbr ARITHEXPR rsqbr";
+	cs r46 = "localvar VARDECL ARRAYOROBJECT semi";
+	cs r47 = "STATEMENT";
+	cs r48 = "LOCALVARDECL";
+	cs r49 = "MEMBERVARDECL";
+	cs r50 = "MEMBERFUNCDECL";
+	cs r51 = "MEMBERFUNCHEAD semi";
+	cs r52 = "constructorkeyword colon PARAMLIST";
+	cs r53 = "function ID colon PARAMLIST ARROWRETURNTYPE";
+	cs r54 = "attribute VARDECL REPTARRAYSIZE semi";
+	cs r55 = "id _Id";
+	cs r56 = "ID colon TYPE _Type";
+	cs r57 = "and";
+	cs r58 = "div";
+	cs r59 = "mult";
+	cs r60 = "";
+	cs r61 = "isa ID REPTINHERITSLIST";
+	cs r62 = "REPTPROG0";
+	cs r63 = "ARITHEXPR RELOPOP ARITHEXPR _Operation";
+	cs r64 = "RELOP _OpType";
+	cs r65 = "geq";
+	cs r66 = "leq";
+	cs r67 = "gt";
+	cs r68 = "lt";
+	cs r69 = "neq";
+	cs r70 = "eq";
+	cs r71 = "";
+	cs r72 = "APARAMSTAIL REPTAPARAMS1";
+	cs r73 = "";
+	cs r74 = "ARRAYSIZE _Dim REPTARRAYSIZE";
+	cs r75 = "";
+	cs r76 = "FPARAMSTAIL REPTFPARAMS4";
+	cs r77 = "";
+	cs r78 = "INDICE REPTIDNEST1";
+	cs r79 = "";
+	cs r80 = "comma ID REPTINHERITSLIST";
+	cs r81 = "LOCALVARORSTAT REPTLOCALVARORSTAT";
+	cs r82 = "";
+	cs r83 = "VISIBILITY MEMBERDECL REPTMEMBERDECL";
+	cs r84 = "";
+	cs r85 = "CLASSDECLORFUNCDEF REPTPROG0";
+	cs r86 = "";
+	cs r87 = "STATEMENT REPTSTATBLOCK1";
+	cs r88 = "";
+	cs r89 = "";
+	cs r90 = "VARIDNEST REPTVARIABLE";
+	cs r91 = "";
+	cs r92 = "IDNEST REPTVARIABLEORFUNCTIONCALL";
+	cs r93 = "TYPE _Type";
+	cs r94 = "void _Type";
+	cs r95 = "";
+	cs r96 = "ADDOP _OpType TERM _Operation RIGHTRECARITHEXPR";
+	cs r97 = "";
+	cs r98 = "MULTOP _OpType FACTOR _Operation RIGHTRECTERM";
+	cs r99 = "minus";
+	cs r100 = "plus";
+	cs r101 = "";
+	cs r102 = "STATEMENT";
+	cs r103 = "lcurbr REPTSTATBLOCK1 rcurbr";
+	cs r104 = "STATBLOCK";
+	cs r105 = "return EXPRPAR semi";
+	cs r106 = "write EXPRPAR semi";
+	cs r107 = "read lpar VARIABLE rpar semi";
+	cs r108 = "while RELEXPRPAR STATEMENTBLOCK semi";
+	cs r109 = "if RELEXPRPAR then STATEMENTBLOCK else STATEMENTBLOCK semi";
+	cs r110 = "ID STATEMENTIDNEST semi";
+	cs r111 = "lpar RELEXPR rpar";
+	cs r112 = "lpar EXPR rpar";
+	cs r113 = "APARAMSLIST _FuncCall _Dot STATEMENTIDNEST2";
+	cs r114 = "_Variable DOTIDSTATEMENTIDNEST";
+	cs r115 = "INDICE REPTIDNEST1 _Variable STATEMENTIDNEST3";
+	cs r116 = "_Variable _Dot ASSIGNOP EXPR _AssignStat";
+	cs r117 = "DOTIDSTATEMENTIDNEST";
+	cs r118 = "_FuncCallStat";
+	cs r119 = "DOTIDSTATEMENTIDNEST";
+	cs r120 = "_Variable _Dot ASSIGNOP EXPR _AssignStat";
+	cs r121 = "dot ID STATEMENTIDNEST";
+	cs r122 = "FACTOR RIGHTRECTERM";
+	cs r123 = "float";
+	cs r124 = "integer";
+	cs r125 = "id";
+	cs r126 = "ID VARIABLE2";
+	cs r127 = "REPTIDNEST1 REPTVARIABLE";
+	cs r128 = "APARAMSLISTIDNEST";
+	cs r129 = "dot ID VARIDNEST2";
+	cs r130 = "lpar APARAMS rpar";
+	cs r131 = "APARAMSLIST VARIDNEST";
+	cs r132 = "REPTIDNEST1";
+	cs r133 = "APARAMSLISTIDNEST";
+	cs r134 = "private";
+	cs r135 = "public";
 
 	cs t_ = "";
 	cs t_$ = "$";
@@ -272,7 +338,6 @@ unordered_map<string, unordered_map<string, string>> Parser::initialize_parsing_
 	cs t_public = "public";
 	cs t_rpar = "rpar";
 	cs t_lpar = "lpar";
-	cs t_id = "id";
 	cs t_dot = "dot";
 	cs t_float = "float";
 	cs t_integer = "integer";
@@ -301,86 +366,99 @@ unordered_map<string, unordered_map<string, string>> Parser::initialize_parsing_
 	cs t_div = "div";
 	cs t_mult = "mult";
 	cs t_colon = "colon";
+	cs t_id = "id";
 	cs t_attribute = "attribute";
 	cs t_constructorkeyword = "constructorkeyword";
-	cs t_arrow = "arrow";
 	cs t_function = "function";
 	cs t_localvar = "localvar";
 	cs t_rsqbr = "rsqbr";
 	cs t_lsqbr = "lsqbr";
+	cs t_arrow = "arrow";
 	cs t_sr = "sr";
 	cs t_not = "not";
 	cs t_floatnum = "floatnum";
-	cs t_intnum = "intnum";
 	cs t_class = "class";
 	cs t_assign = "assign";
+	cs t_intnum = "intnum";
 	cs t_or = "or";
 	cs t_eof = "eof";
 
 	unordered_map<string, unordered_map<string, string>> parsing_map = {
-			{"START", {{t_function, r1},{t_class, r1},{t_eof, r1},}},
+		{"START", {{t_function, r1},{t_class, r1},{t_eof, r1},}},
 {"ADDOP", {{t_minus, r2},{t_plus, r3},{t_or, r4},}},
-{"APARAMS", {{t_rpar, r5},{t_lpar, r6},{t_id, r6},{t_minus, r6},{t_plus, r6},{t_not, r6},{t_floatnum, r6},{t_intnum, r6},}},
+{"APARAMS", {{t_rpar, r5},{t_lpar, r6},{t_minus, r6},{t_plus, r6},{t_id, r6},{t_not, r6},{t_floatnum, r6},{t_intnum, r6},}},
 {"APARAMSTAIL", {{t_comma, r7},}},
-{"ARITHEXPR", {{t_lpar, r8},{t_id, r8},{t_minus, r8},{t_plus, r8},{t_not, r8},{t_floatnum, r8},{t_intnum, r8},}},
+{"ARITHEXPR", {{t_lpar, r8},{t_minus, r8},{t_plus, r8},{t_id, r8},{t_not, r8},{t_floatnum, r8},{t_intnum, r8},}},
 {"ARRAYOROBJECT", {{t_lpar, r9},{t_semi, r10},{t_lsqbr, r10},}},
 {"ARRAYSIZE", {{t_lsqbr, r11},}},
 {"ARRAYSIZE2", {{t_rsqbr, r12},{t_intnum, r13},}},
-{"ASSIGNOP", {{t_assign, r14},}},
-{"CLASSDECL", {{t_class, r15},}},
-{"CLASSDECLORFUNCDEF", {{t_function, r16},{t_class, r17},}},
-{"EXPR", {{t_lpar, r18},{t_id, r18},{t_minus, r18},{t_plus, r18},{t_not, r18},{t_floatnum, r18},{t_intnum, r18},}},
-{"EXPR2", {{t_rpar, r5},{t_semi, r5},{t_comma, r5},{t_geq, r19},{t_leq, r19},{t_gt, r19},{t_lt, r19},{t_neq, r19},{t_eq, r19},}},
-{"FACTOR", {{t_lpar, r20},{t_id, r21},{t_minus, r22},{t_plus, r22},{t_not, r23},{t_floatnum, r24},{t_intnum, r25},}},
-{"FACTOR2", {{t_rpar, r26},{t_lpar, r9},{t_dot, r26},{t_semi, r26},{t_minus, r26},{t_plus, r26},{t_comma, r26},{t_geq, r26},{t_leq, r26},{t_gt, r26},{t_lt, r26},{t_neq, r26},{t_eq, r26},{t_and, r26},{t_div, r26},{t_mult, r26},{t_rsqbr, r26},{t_lsqbr, r26},{t_or, r26},}},
-{"FPARAMS", {{t_rpar, r5},{t_id, r27},}},
-{"FPARAMSTAIL", {{t_comma, r28},}},
-{"FUNCBODY", {{t_lcurbr, r29},}},
-{"FUNCDEF", {{t_function, r30},}},
-{"FUNCHEAD", {{t_function, r31},}},
-{"FUNCHEADMEMBERTAIL", {{t_id, r32},{t_constructorkeyword, r33},}},
-{"FUNCHEADTAIL", {{t_lpar, r34},{t_sr, r35},}},
-{"IDNEST", {{t_dot, r36},}},
-{"IDNEST2", {{t_rpar, r26},{t_lpar, r9},{t_dot, r26},{t_semi, r26},{t_minus, r26},{t_plus, r26},{t_comma, r26},{t_geq, r26},{t_leq, r26},{t_gt, r26},{t_lt, r26},{t_neq, r26},{t_eq, r26},{t_and, r26},{t_div, r26},{t_mult, r26},{t_rsqbr, r26},{t_lsqbr, r26},{t_or, r26},}},
-{"INDICE", {{t_lsqbr, r37},}},
-{"LOCALVARDECL", {{t_localvar, r38},}},
-{"LOCALVARORSTAT", {{t_id, r39},{t_return, r39},{t_write, r39},{t_read, r39},{t_while, r39},{t_if, r39},{t_localvar, r40},}},
-{"MEMBERDECL", {{t_attribute, r41},{t_constructorkeyword, r42},{t_function, r42},}},
-{"MEMBERFUNCDECL", {{t_constructorkeyword, r43},{t_function, r43},}},
-{"MEMBERFUNCHEAD", {{t_constructorkeyword, r44},{t_function, r45},}},
-{"MEMBERVARDECL", {{t_attribute, r46},}},
-{"MULTOP", {{t_and, r47},{t_div, r48},{t_mult, r49},}},
-{"OPTINHERITS", {{t_lcurbr, r5},{t_isa, r50},}},
-{"PROG", {{t_function, r51},{t_class, r51},{t_eof, r51},}},
-{"RELEXPR", {{t_lpar, r52},{t_id, r52},{t_minus, r52},{t_plus, r52},{t_not, r52},{t_floatnum, r52},{t_intnum, r52},}},
-{"RELOP", {{t_geq, r53},{t_leq, r54},{t_gt, r55},{t_lt, r56},{t_neq, r57},{t_eq, r58},}},
-{"REPTAPARAMS1", {{t_rpar, r5},{t_comma, r59},}},
-{"REPTARRAYSIZE", {{t_rpar, r5},{t_semi, r5},{t_comma, r5},{t_lsqbr, r60},}},
-{"REPTFPARAMS4", {{t_rpar, r5},{t_comma, r61},}},
-{"REPTIDNEST1", {{t_rpar, r5},{t_dot, r5},{t_semi, r5},{t_minus, r5},{t_plus, r5},{t_comma, r5},{t_geq, r5},{t_leq, r5},{t_gt, r5},{t_lt, r5},{t_neq, r5},{t_eq, r5},{t_and, r5},{t_div, r5},{t_mult, r5},{t_rsqbr, r5},{t_lsqbr, r62},{t_assign, r5},{t_or, r5},}},
-{"REPTINHERITSLIST", {{t_lcurbr, r5},{t_comma, r63},}},
-{"REPTLOCALVARORSTAT", {{t_id, r64},{t_return, r64},{t_write, r64},{t_read, r64},{t_while, r64},{t_if, r64},{t_rcurbr, r5},{t_localvar, r64},}},
-{"REPTMEMBERDECL", {{t_private, r65},{t_public, r65},{t_rcurbr, r5},}},
-{"REPTPROG0", {{t_function, r66},{t_class, r66},{t_eof, r5},}},
-{"REPTSTATBLOCK1", {{t_id, r67},{t_return, r67},{t_write, r67},{t_read, r67},{t_while, r67},{t_if, r67},{t_rcurbr, r5},}},
-{"REPTVARIABLE", {{t_rpar, r5},{t_dot, r68},}},
-{"REPTVARIABLEORFUNCTIONCALL", {{t_rpar, r5},{t_dot, r69},{t_semi, r5},{t_minus, r5},{t_plus, r5},{t_comma, r5},{t_geq, r5},{t_leq, r5},{t_gt, r5},{t_lt, r5},{t_neq, r5},{t_eq, r5},{t_and, r5},{t_div, r5},{t_mult, r5},{t_rsqbr, r5},{t_or, r5},}},
-{"RETURNTYPE", {{t_id, r70},{t_float, r70},{t_integer, r70},{t_void, r71},}},
-{"RIGHTRECARITHEXPR", {{t_rpar, r5},{t_semi, r5},{t_minus, r72},{t_plus, r72},{t_comma, r5},{t_geq, r5},{t_leq, r5},{t_gt, r5},{t_lt, r5},{t_neq, r5},{t_eq, r5},{t_rsqbr, r5},{t_or, r72},}},
-{"RIGHTRECTERM", {{t_rpar, r5},{t_semi, r5},{t_minus, r5},{t_plus, r5},{t_comma, r5},{t_geq, r5},{t_leq, r5},{t_gt, r5},{t_lt, r5},{t_neq, r5},{t_eq, r5},{t_and, r73},{t_div, r73},{t_mult, r73},{t_rsqbr, r5},{t_or, r5},}},
-{"SIGN", {{t_minus, r2},{t_plus, r3},}},
-{"STATBLOCK", {{t_id, r39},{t_semi, r5},{t_return, r39},{t_write, r39},{t_read, r39},{t_while, r39},{t_else, r5},{t_if, r39},{t_lcurbr, r74},}},
-{"STATEMENT", {{t_id, r75},{t_return, r76},{t_write, r77},{t_read, r78},{t_while, r79},{t_if, r80},}},
-{"STATEMENTIDNEST", {{t_lpar, r81},{t_dot, r82},{t_lsqbr, r83},{t_assign, r84},}},
-{"STATEMENTIDNEST2", {{t_dot, r82},{t_semi, r5},}},
-{"STATEMENTIDNEST3", {{t_dot, r82},{t_assign, r84},}},
-{"TERM", {{t_lpar, r85},{t_id, r85},{t_minus, r85},{t_plus, r85},{t_not, r85},{t_floatnum, r85},{t_intnum, r85},}},
-{"TYPE", {{t_id, r86},{t_float, r87},{t_integer, r88},}},
-{"VARIABLE", {{t_id, r89},}},
-{"VARIABLE2", {{t_rpar, r90},{t_lpar, r91},{t_dot, r90},{t_lsqbr, r90},}},
-{"VARIDNEST", {{t_dot, r92},}},
-{"VARIDNEST2", {{t_rpar, r26},{t_lpar, r91},{t_dot, r26},{t_lsqbr, r26},}},
-{"VISIBILITY", {{t_private, r93},{t_public, r94},}},
+{"INTNUM", {{t_intnum, r14},}},
+{"ASSIGNOP", {{t_assign, r15},}},
+{"CLASSDECL", {{t_class, r16},}},
+{"CLASSDECLORFUNCDEF", {{t_function, r17},{t_class, r18},}},
+{"EXPR", {{t_lpar, r19},{t_minus, r19},{t_plus, r19},{t_id, r19},{t_not, r19},{t_floatnum, r19},{t_intnum, r19},}},
+{"EXPR2", {{t_rpar, r20},{t_semi, r20},{t_comma, r20},{t_geq, r21},{t_leq, r21},{t_gt, r21},{t_lt, r21},{t_neq, r21},{t_eq, r21},}},
+{"FACTOR", {{t_lpar, r22},{t_minus, r23},{t_plus, r23},{t_id, r24},{t_not, r25},{t_floatnum, r26},{t_intnum, r27},}},
+{"FACTOR2", {{t_rpar, r28},{t_lpar, r29},{t_dot, r28},{t_semi, r28},{t_minus, r28},{t_plus, r28},{t_comma, r28},{t_geq, r28},{t_leq, r28},{t_gt, r28},{t_lt, r28},{t_neq, r28},{t_eq, r28},{t_and, r28},{t_div, r28},{t_mult, r28},{t_rsqbr, r28},{t_lsqbr, r28},{t_or, r28},}},
+{"FPARAMS", {{t_rpar, r30},{t_id, r31},}},
+{"FPARAMSTAIL", {{t_comma, r32},}},
+{"FUNCBODY", {{t_lcurbr, r33},}},
+{"FUNCDEF", {{t_function, r34},}},
+{"FUNCHEAD", {{t_function, r35},}},
+{"PARAMLIST", {{t_lpar, r36},}},
+{"FUNCHEADMEMBERTAIL", {{t_id, r37},{t_constructorkeyword, r38},}},
+{"FUNCHEADTAIL", {{t_lpar, r39},{t_sr, r40},}},
+{"ARROWRETURNTYPE", {{t_arrow, r41},}},
+{"IDNEST", {{t_dot, r42},}},
+{"IDNEST2", {{t_rpar, r43},{t_lpar, r44},{t_dot, r43},{t_semi, r43},{t_minus, r43},{t_plus, r43},{t_comma, r43},{t_geq, r43},{t_leq, r43},{t_gt, r43},{t_lt, r43},{t_neq, r43},{t_eq, r43},{t_and, r43},{t_div, r43},{t_mult, r43},{t_rsqbr, r43},{t_lsqbr, r43},{t_or, r43},}},
+{"INDICE", {{t_lsqbr, r45},}},
+{"LOCALVARDECL", {{t_localvar, r46},}},
+{"LOCALVARORSTAT", {{t_return, r47},{t_write, r47},{t_read, r47},{t_while, r47},{t_if, r47},{t_id, r47},{t_localvar, r48},}},
+{"MEMBERDECL", {{t_attribute, r49},{t_constructorkeyword, r50},{t_function, r50},}},
+{"MEMBERFUNCDECL", {{t_constructorkeyword, r51},{t_function, r51},}},
+{"MEMBERFUNCHEAD", {{t_constructorkeyword, r52},{t_function, r53},}},
+{"MEMBERVARDECL", {{t_attribute, r54},}},
+{"ID", {{t_id, r55},}},
+{"VARDECL", {{t_id, r56},}},
+{"MULTOP", {{t_and, r57},{t_div, r58},{t_mult, r59},}},
+{"OPTINHERITS", {{t_lcurbr, r60},{t_isa, r61},}},
+{"PROG", {{t_function, r62},{t_class, r62},{t_eof, r62},}},
+{"RELEXPR", {{t_lpar, r63},{t_minus, r63},{t_plus, r63},{t_id, r63},{t_not, r63},{t_floatnum, r63},{t_intnum, r63},}},
+{"RELOPOP", {{t_geq, r64},{t_leq, r64},{t_gt, r64},{t_lt, r64},{t_neq, r64},{t_eq, r64},}},
+{"RELOP", {{t_geq, r65},{t_leq, r66},{t_gt, r67},{t_lt, r68},{t_neq, r69},{t_eq, r70},}},
+{"REPTAPARAMS1", {{t_rpar, r71},{t_comma, r72},}},
+{"REPTARRAYSIZE", {{t_rpar, r73},{t_semi, r73},{t_comma, r73},{t_lsqbr, r74},}},
+{"REPTFPARAMS4", {{t_rpar, r75},{t_comma, r76},}},
+{"REPTIDNEST1", {{t_rpar, r77},{t_dot, r77},{t_semi, r77},{t_minus, r77},{t_plus, r77},{t_comma, r77},{t_geq, r77},{t_leq, r77},{t_gt, r77},{t_lt, r77},{t_neq, r77},{t_eq, r77},{t_and, r77},{t_div, r77},{t_mult, r77},{t_rsqbr, r77},{t_lsqbr, r78},{t_assign, r77},{t_or, r77},}},
+{"REPTINHERITSLIST", {{t_lcurbr, r79},{t_comma, r80},}},
+{"REPTLOCALVARORSTAT", {{t_return, r81},{t_write, r81},{t_read, r81},{t_while, r81},{t_if, r81},{t_rcurbr, r82},{t_id, r81},{t_localvar, r81},}},
+{"REPTMEMBERDECL", {{t_private, r83},{t_public, r83},{t_rcurbr, r84},}},
+{"REPTPROG0", {{t_function, r85},{t_class, r85},{t_eof, r86},}},
+{"REPTSTATBLOCK1", {{t_return, r87},{t_write, r87},{t_read, r87},{t_while, r87},{t_if, r87},{t_rcurbr, r88},{t_id, r87},}},
+{"REPTVARIABLE", {{t_rpar, r89},{t_dot, r90},}},
+{"REPTVARIABLEORFUNCTIONCALL", {{t_rpar, r91},{t_dot, r92},{t_semi, r91},{t_minus, r91},{t_plus, r91},{t_comma, r91},{t_geq, r91},{t_leq, r91},{t_gt, r91},{t_lt, r91},{t_neq, r91},{t_eq, r91},{t_and, r91},{t_div, r91},{t_mult, r91},{t_rsqbr, r91},{t_or, r91},}},
+{"RETURNTYPE", {{t_float, r93},{t_integer, r93},{t_void, r94},{t_id, r93},}},
+{"RIGHTRECARITHEXPR", {{t_rpar, r95},{t_semi, r95},{t_minus, r96},{t_plus, r96},{t_comma, r95},{t_geq, r95},{t_leq, r95},{t_gt, r95},{t_lt, r95},{t_neq, r95},{t_eq, r95},{t_rsqbr, r95},{t_or, r96},}},
+{"RIGHTRECTERM", {{t_rpar, r97},{t_semi, r97},{t_minus, r97},{t_plus, r97},{t_comma, r97},{t_geq, r97},{t_leq, r97},{t_gt, r97},{t_lt, r97},{t_neq, r97},{t_eq, r97},{t_and, r98},{t_div, r98},{t_mult, r98},{t_rsqbr, r97},{t_or, r97},}},
+{"SIGN", {{t_minus, r99},{t_plus, r100},}},
+{"STATBLOCK", {{t_semi, r101},{t_return, r102},{t_write, r102},{t_read, r102},{t_while, r102},{t_else, r101},{t_if, r102},{t_lcurbr, r103},{t_id, r102},}},
+{"STATEMENTBLOCK", {{t_semi, r104},{t_return, r104},{t_write, r104},{t_read, r104},{t_while, r104},{t_else, r104},{t_if, r104},{t_lcurbr, r104},{t_id, r104},}},
+{"STATEMENT", {{t_return, r105},{t_write, r106},{t_read, r107},{t_while, r108},{t_if, r109},{t_id, r110},}},
+{"RELEXPRPAR", {{t_lpar, r111},}},
+{"EXPRPAR", {{t_lpar, r112},}},
+{"STATEMENTIDNEST", {{t_lpar, r113},{t_dot, r114},{t_lsqbr, r115},{t_assign, r116},}},
+{"STATEMENTIDNEST2", {{t_dot, r117},{t_semi, r118},}},
+{"STATEMENTIDNEST3", {{t_dot, r119},{t_assign, r120},}},
+{"DOTIDSTATEMENTIDNEST", {{t_dot, r121},}},
+{"TERM", {{t_lpar, r122},{t_minus, r122},{t_plus, r122},{t_id, r122},{t_not, r122},{t_floatnum, r122},{t_intnum, r122},}},
+{"TYPE", {{t_float, r123},{t_integer, r124},{t_id, r125},}},
+{"VARIABLE", {{t_id, r126},}},
+{"VARIABLE2", {{t_rpar, r127},{t_lpar, r128},{t_dot, r127},{t_lsqbr, r127},}},
+{"VARIDNEST", {{t_dot, r129},}},
+{"APARAMSLIST", {{t_lpar, r130},}},
+{"APARAMSLISTIDNEST", {{t_lpar, r131},}},
+{"VARIDNEST2", {{t_rpar, r132},{t_lpar, r133},{t_dot, r132},{t_lsqbr, r132},}},
+{"VISIBILITY", {{t_private, r134},{t_public, r135},}},
 	};
 
 	return parsing_map;
