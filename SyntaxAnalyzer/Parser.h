@@ -15,6 +15,7 @@ private:
 	std::ofstream error_file;
 	string left_side = "";
 	SemanticAnalyzer* semantic_analyzer;
+	void print_current_grammar();
 public:
 	bool error;
 	static const std::unordered_map<std::string, std::unordered_map<std::string, std::string>> parsing_map;

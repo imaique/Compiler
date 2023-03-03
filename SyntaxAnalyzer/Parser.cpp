@@ -476,6 +476,21 @@ Parser::Parser(std::string filename, SemanticAnalyzer* s_a) : la(LexicalAnalyzer
 	error_file.open("output/outsyntax/" + filename + ".outsyntaxerrors");
 }
 
+void Parser::print_current_grammar() {
+	std::ofstream grm_file ("output/attribute_grammar.grm");
+	for (auto non_terminal : parsing_map) {
+		unordered_set<string> u_set;
+		for (auto transitions : non_terminal.second) {
+			string rule = transitions.second;
+			if (!u_set.count(rule)) {
+				grm_file << non_terminal.first << " -> " << rule << std::endl;
+				u_set.insert(rule);
+			}
+		}
+		grm_file << std::endl;
+	}
+}
+
 void Parser::print_stack() {
 	std::stringstream ss;
 	ss << left_side;
@@ -491,6 +506,7 @@ void Parser::print_stack() {
 }
 
 bool Parser::parse() {
+	print_current_grammar();
 	stack.push("$");
 	stack.push("START");
 
