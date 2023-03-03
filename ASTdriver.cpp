@@ -34,21 +34,17 @@ void traverse_ast(AST* node, int& unique, std::ofstream& dot_file) {
     }
 }
 
-void write_ast(AST* root, string filename, std::stack<AST*> m_stack) {
+void write_ast(AST* root, string filename) {
     
     std::ofstream dot_file("output/outAST/" + filename + ".dot.outast");
     dot_file << "digraph AST {" << endl;
     dot_file << "node [shape=record];" << endl;
-    dot_file << "node [fontname=Sans];charset=\"UTF - 8\" splines=true splines=spline rankdir =LR" << endl;
+    dot_file << "node [fontname=Sans];" << "charset = \"UTF-8\"" <<  "splines = true splines = spline rankdir = LR" << endl;
 
     int unique = 1;
 
     if (root) {
-        m_stack.push(root);
-        while (!m_stack.empty()) {
-            traverse_ast(m_stack.top(), unique, dot_file);
-            m_stack.pop();
-        }
+        traverse_ast(root, unique, dot_file);
     }
 
     dot_file << "}";
@@ -62,8 +58,7 @@ int main() {
         if (std::filesystem::exists(source_file)) {
             SemanticAnalyzer sa = SemanticAnalyzer(filename);
             AST* root = sa.get_AST();
-            std::stack<AST*> m_stack = sa.m_stack;
-            write_ast(root, filename, m_stack);
+            write_ast(root, filename);
         }
         else {
             std::cout << source_file << " doesn't exist. Please make sure the file is in the input folder. Skipping file." << std::endl;
