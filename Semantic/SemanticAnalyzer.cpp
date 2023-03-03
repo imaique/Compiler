@@ -39,11 +39,11 @@ namespace SemanticAnalyzerConstants {
 using namespace SemanticAnalyzerConstants;
 typedef SemanticAnalyzer SA;
 
-AST::AST(std::string type, std::string value) : is_leaf(true), type(type), value(value) {
-
+AST::AST(std::string type, std::string value, Token t) : is_leaf(true), type(type), value(value) {
+	token = new Token(t);
 }
 
-AST::AST(std::string type, std::vector<AST*> children) : is_leaf(false), type(type), children(children) {
+AST::AST(std::string type, std::vector<AST*> children) : is_leaf(false), type(type), children(children), token(nullptr) {
 
 }
 
@@ -119,9 +119,11 @@ bool SemanticAnalyzer::perform_semantic_action(std::string action, const Token& 
 	vector<AST*> children;
 
 	AST* new_node = nullptr;
-
-	if (m_leaves.count(type)) {
-		new_node = new AST(type, token.lexeme);
+	if (type == "stop") {
+		m_stack.push(nullptr);
+	}
+	else if (m_leaves.count(type)) {
+		new_node = new AST(type, token.lexeme, token);
 		m_stack.push(new_node);
 	}
 	else {
