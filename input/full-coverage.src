@@ -116,6 +116,22 @@ function LINEAR::constructor(A: float[], B: float)
   self.b = B;
 }
 
+function main() => void
+{
+  localvar f1: LINEAR(2, 3.5);
+  localvar f2: QUADRATIC(-2.0, 1.0, 0.0);
+  localvar counter: integer;
+
+  counter = 1; 	
+
+  while(counter <= 10)
+  {
+    write(counter);
+    write(f1.evaluate(counter));
+    write(f2.evaluate(counter));
+  };
+}
+
 /*
     classes
     --------------------------------------
@@ -138,7 +154,7 @@ function LINEAR::constructor(A: float[], B: float)
     functions: definitions
     --------------------------------------
 |X| no main function definition
-| | main function definition
+|x| main function definition
 |X| no free function definition
 |X| free function definition
 |x| multiple free function definitions
