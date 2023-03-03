@@ -22,18 +22,22 @@ namespace SemanticAnalyzerConstants {
 	const string FuncDef = "FuncDef";
 	const string Scope = "Scope";
 	const string ParamList = "ParamList";
+	const string AParamList = "AParamList";
 	const string StatBlock = "StatBlock";
 	const string AssignStat = "AssignStat";
 	const string FuncCallStat = "FuncCallStat";
 	const string VarDecl = "VarDecl";
 	const string Variable = "Variable";
 	const string Operation = "Operation";
-	const string Dot = "Dot";
+	const string DotList = "DotList";
 	const string FuncCall = "FuncCall";
 	const string Dim = "Dim";
 	const string DimList = "DimList";
 	const string Statement = "Statement";
-	const string AParamList = "AParamList";
+	const string StatType = "StatType";
+	const string Sign = "Sign";
+	const string Visibility = "Visibility";
+	
 }
 
 using namespace SemanticAnalyzerConstants;
@@ -53,22 +57,26 @@ const std::unordered_set <std::string> SA::m_leaves = {
 	IntNum,
 	FloatNum,
 	OpType,
+	StatType,
+	Sign,
+	Visibility,
 };
 // -1 indicates infinitely many
 const std::unordered_map<std::string, unordered_map<std::string, int>> SA::m_trees = {
 	{FuncDef, {{Scope, 1}, {Id, 1}, {ParamList, 1}, {Type, 1}, {StatBlock, 1}, }},
 	{Scope, {{Id, 1}, }},
 	{ParamList, {{VarDecl, -1}, }},
-	{StatBlock, {{Statement, -1},{AssignStat, -1}, {FuncCallStat, -1}, }},
+	{StatBlock, {{any, -1}, }},
+	{Statement, {{any, -1}, }},
 	{AssignStat, {{any, 2}, }},
 	{FuncCallStat, {{any, 1}, }},
-	{VarDecl, {{Id, 1}, {Type, 1}, {DimList, 1}, }},
+	{VarDecl, {{any, -1}, }},
 	{Variable, {{Id, 1}, {DimList, 1}, }},
 	{Operation, {{any, 2}, {OpType, 1}, }},
-	{Dot, {{FuncCall, -1}, {Variable, -1},}},
+	{DotList, {{FuncCall, -1}, {Variable, -1},}},
 	{FuncCall, {{Id, 1}, {AParamList, 1},}},
-	{Dim, {{IntNum, 1},}},
 	{DimList, {{Dim, -1},}},
+	{AParamList, {{any, -1}, }}
 };
 
 SemanticAnalyzer::SemanticAnalyzer(std::string filename) {
@@ -77,7 +85,7 @@ SemanticAnalyzer::SemanticAnalyzer(std::string filename) {
 
 bool SemanticAnalyzer::top_in_shape(std::unordered_map<std::string, int>& current_shape)
 {
-	if (m_stack.empty()) return false;
+	if (m_stack.empty() || !m_stack.top()) return false;
 	string top_type = m_stack.top()->type;
 	if (current_shape.count(top_type)) {
 		std::cout << current_shape[top_type] << " " << top_type << std::endl;
@@ -127,11 +135,15 @@ bool SemanticAnalyzer::perform_semantic_action(std::string action, const Token& 
 		m_stack.push(new_node);
 	}
 	else {
-		unordered_map<std::string, int> current_shape = m_trees.at(type);
-
-		int any = 0;
-		if (current_shape.count("")) {
-			any = current_shape.at("");
+		
+		unordered_map<std::string, int> current_shape = unordered_map<std::string, int>();
+		int any = -1;
+		if (m_trees.count(type)) {
+			current_shape = m_trees.at(type);
+			any = 0;
+			if (current_shape.count("")) {
+				any = current_shape.at("");
+			}
 		}
 
 		while (top_in_shape(current_shape)) {
@@ -139,11 +151,13 @@ bool SemanticAnalyzer::perform_semantic_action(std::string action, const Token& 
 			m_stack.pop();
 		}
 
-		while (any > 0) {
+		while (any && m_stack.top()) {
 			if(!top_in_shape(current_shape)) any--;;
 			children.push_back(m_stack.top());
 			m_stack.pop();
 		}
+
+		if (any && !m_stack.empty() && !m_stack.top()) m_stack.pop();
 
 		for (const auto& pair : current_shape) {
 			// Push empty node if part of shape
