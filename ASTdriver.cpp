@@ -11,14 +11,26 @@ void traverse_ast(AST* node, int& unique, std::ofstream& dot_file) {
     int node_id = unique++;
     dot_file << node_id << "[label=\"" << node->get_type();
 
-    if (node->is_leaf) dot_file << " | " << node->get_value();
+    if (node->is_leaf) {
+        string value = node->get_value();
+        if (!isalnum(value[0])) value = Token::get_string(node->token->token_type);
+        dot_file << " | " << value;
+    }
 
     dot_file << "\"];" << endl;
 
-    for (int i = node->children.size() - 1; i >= 0; i--) {
-        AST* child_node = node->children[i];
-        dot_file << node_id << "->" << unique << ";";
-        traverse_ast(child_node, unique, dot_file);
+    if (!node->is_leaf) {
+        if (node->children.size()) {
+            for (int i = node->children.size() - 1; i >= 0; i--) {
+                AST* child_node = node->children[i];
+                dot_file << node_id << "->" << unique << ";";
+                traverse_ast(child_node, unique, dot_file);
+            }
+        }
+        else {
+            dot_file << "none" << node_id << "[shape=point];" << endl;
+            dot_file << node_id << "->none" << node_id << ";";
+        }
     }
 }
 
