@@ -110,7 +110,6 @@
     <ClCompile Include="LexicalAnalyzer\Token.cpp" />
     <ClCompile Include="Semantic\SemanticAnalyzer.cpp" />
     <ClCompile Include="SyntaxAnalyzer\Parser.cpp" />
-    <ClCompile Include="Utils\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LexicalAnalyzer\LexicalAnalyzer.h" />
