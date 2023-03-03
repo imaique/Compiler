@@ -97,9 +97,10 @@ bool SemanticAnalyzer::top_in_shape(std::unordered_map<std::string, int>& curren
 AST* SemanticAnalyzer::get_AST() {
 	parser->parse();
 	if (m_stack.empty() || parser->error) return nullptr;
-	AST* result = m_stack.top();
+	AST* root = m_stack.top();
+	transform_tree(root);
 	m_stack.pop();
-	return result;
+	return root;
 }
 
 string AST::get_value() {
@@ -176,14 +177,43 @@ bool SemanticAnalyzer::perform_semantic_action(std::string action, const Token& 
 	return true;
 }
 
-void SA::add_top(vector<AST*>& children) {
+void SemanticAnalyzer::add_top(vector<AST*>& children) {
 	children.push_back(m_stack.top());
 	m_stack.pop();
 }
 
+void SemanticAnalyzer::transform_tree(AST* root) {
+	convert_dot_lists(root);
+}
+void SemanticAnalyzer::convert_dot_lists(AST* node) {
+	vector<AST*> children = node->children;
+	if (node->get_type() == "DotList") {
+		int child_nb = children.size();
+		if (child_nb == 1) {
+			*node = *(children[0]);
+		}
+		else if (child_nb == 2) {
+			node->type = "Dot";
+		}
+		else {
+			AST* new_node = create_dot(children);
+			*node = *(new_node);
+		}
+	}
 
+	for (AST* child : children)
+		convert_dot_lists(child);
+}
 
-const unordered_map<string, void(SA::*)()> m_map{
-
-};
+AST* SemanticAnalyzer::create_dot(vector<AST*>& children) {
+	if (children.size() == 2) {
+		return new AST("Dot", children);
+	}
+	else {
+		AST* last_child = children.back();
+		children.pop_back();
+		AST* first_child = create_dot(children);
+		return new AST("Dot", {first_child, last_child});
+	}
+}
 

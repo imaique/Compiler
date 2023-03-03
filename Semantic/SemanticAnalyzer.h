@@ -27,6 +27,9 @@ private:
 	Parser* parser;
 	void add_top(std::vector<AST*>& children);
 	bool top_in_shape(std::unordered_map<std::string, int>& current_shape);
+	void transform_tree(AST* root);
+	AST* create_dot(std::vector<AST*>& children);
+	void convert_dot_lists(AST* node);
 public:
 	std::stack<AST*> m_stack;
 	AST* get_AST();
