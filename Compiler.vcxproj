@@ -108,7 +108,9 @@
     <ClCompile Include="LexicalAnalyzer\LexicalAnalyzer.cpp" />
     <ClCompile Include="LexicalAnalyzer\State\State.cpp" />
     <ClCompile Include="LexicalAnalyzer\Token.cpp" />
+    <ClCompile Include="Semantic\AST.cpp" />
     <ClCompile Include="Semantic\ASTGenerator.cpp" />
+    <ClCompile Include="Semantic\SemanticAnalyzer.cpp" />
     <ClCompile Include="SyntaxAnalyzer\Parser.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -116,6 +118,8 @@
     <ClInclude Include="LexicalAnalyzer\State\State.h" />
     <ClInclude Include="LexicalAnalyzer\Token.h" />
     <ClInclude Include="Semantic\ASTGenerator.h" />
+    <ClInclude Include="Semantic\AST.h" />
+    <ClInclude Include="Semantic\SemanticAnalyzer.h" />
     <ClInclude Include="SyntaxAnalyzer\Parser.h" />
   </ItemGroup>
   <ItemGroup>

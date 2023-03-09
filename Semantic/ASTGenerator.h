@@ -1,24 +1,11 @@
 #pragma once
 #include "../SyntaxAnalyzer/Parser.h"
+#include "AST.h"
 #include <stack>
 #include <unordered_map>
 #include <unordered_set>
 
 
-class AST {
-public:
-	std::string get_type();
-	std::string get_value();
-	AST(std::string type, std::string value, Token token);
-	AST(std::string type, std::vector<AST*> children);
-
-//private:
-	std::string type;
-	Token* token;
-	bool is_leaf;
-	std::string value;
-	std::vector<AST*> children;
-};
 
 class ASTGenerator {
 private:

@@ -42,13 +42,7 @@ namespace ASTConstants {
 using namespace ASTConstants;
 typedef ASTGenerator SA;
 
-AST::AST(std::string type, std::string value, Token t) : is_leaf(true), type(type), value(value) {
-	token = new Token(t);
-}
 
-AST::AST(std::string type, std::vector<AST*> children) : is_leaf(false), type(type), children(children), token(nullptr) {
-
-}
 
 const std::unordered_set <std::string> SA::m_leaves = {
 	Id,
@@ -102,14 +96,7 @@ AST* ASTGenerator::get_AST() {
 	return root;
 }
 
-string AST::get_value() {
-	return value;
-}
 
-
-string AST::get_type() {
-	return type;
-}
 
 // format s_<semantic_role>_<type>
 

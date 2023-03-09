@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "ASTGenerator.h"
+#include "AST.h"
 
 class SemanticAnalyzer {
 private:
