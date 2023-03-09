@@ -2,7 +2,7 @@
 #include <string>
 #include <filesystem>
 
-#include "Semantic/SemanticAnalyzer.h"
+#include "Semantic/ASTGenerator.h"
 
 using std::string;
 using std::endl;
@@ -51,12 +51,12 @@ void write_ast(AST* root, string filename) {
 }
 
 int main() {
-    std::vector<std::string> test_files{ "syntax-func", }; //"example-polynomial", "example-bubblesort" };
+    std::vector<std::string> test_files{ "syntax-func", "example-polynomial", "example-bubblesort", "full-coverage"};
 
     for (auto filename : test_files) {
         std::string source_file = "input/" + filename + ".src";
         if (std::filesystem::exists(source_file)) {
-            SemanticAnalyzer sa = SemanticAnalyzer(filename);
+            ASTGenerator sa = ASTGenerator(filename);
             AST* root = sa.get_AST();
             write_ast(root, filename);
         }

@@ -27,7 +27,7 @@
     <ClCompile Include="SyntaxAnalyzer\Parser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Semantic\SemanticAnalyzer.cpp">
+    <ClCompile Include="Semantic\ASTGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ASTdriver.cpp">
@@ -47,7 +47,7 @@
     <ClInclude Include="SyntaxAnalyzer\Parser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Semantic\SemanticAnalyzer.h">
+    <ClInclude Include="Semantic\ASTGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

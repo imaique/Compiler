@@ -3,7 +3,7 @@
 #include "../LexicalAnalyzer/LexicalAnalyzer.h"
 #include <stack>
 
-class SemanticAnalyzer;
+class ASTGenerator;
 
 using std::string;
 class Parser {
@@ -14,7 +14,7 @@ private:
 	std::ofstream derivation_file;
 	std::ofstream error_file;
 	string left_side = "";
-	SemanticAnalyzer* semantic_analyzer;
+	ASTGenerator* semantic_analyzer;
 	void print_current_grammar();
 public:
 	bool error;
@@ -23,7 +23,7 @@ public:
 	static const std::unordered_map<std::string, std::unordered_set<std::string>> follow_set_map;
 	static const std::unordered_set<std::string> nullable_set;
 	Parser(std::string filename);
-	Parser(std::string filename, SemanticAnalyzer* s_a);
+	Parser(std::string filename, ASTGenerator* s_a);
 	std::stack<std::string> stack;
 	bool parse();
 	void pop();

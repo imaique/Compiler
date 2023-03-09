@@ -1,5 +1,5 @@
 #include "Parser.h"
-#include "../Semantic/SemanticAnalyzer.h"
+#include "../Semantic/ASTGenerator.h"
 
 #include <sstream>
 
@@ -471,7 +471,7 @@ Parser::Parser(std::string filename) : la(LexicalAnalyzer(filename)), error(fals
 	error_file.open("output/outsyntax/" + filename + ".outsyntaxerrors");
 }
 
-Parser::Parser(std::string filename, SemanticAnalyzer* s_a) : la(LexicalAnalyzer(filename)), error(false), semantic_analyzer(s_a) {
+Parser::Parser(std::string filename, ASTGenerator* s_a) : la(LexicalAnalyzer(filename)), error(false), semantic_analyzer(s_a) {
 	derivation_file.open("output/outsyntax/" + filename + ".outderivation");
 	error_file.open("output/outsyntax/" + filename + ".outsyntaxerrors");
 }

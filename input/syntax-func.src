@@ -1,15 +1,9 @@
-function main() => void
+function f5() => id
 {
-  localvar f1: LINEAR(2, 3.5);
-  localvar f2: QUADRATIC(-2.0, 1.0, 0.0);
-  localvar counter: integer;
-
-  counter = 1; 	
-
-  while(counter <= 10)
-  {
-    write(counter);
-    write(f1.evaluate(counter));
-    write(f2.evaluate(counter));
-  };
-}
+  a.b(c);
+  g(h).i = 1;
+  j(k).l();
+  m.n[o] = 2;
+  p[q].r = 3;
+  s[t].u[v] = 4;
+  }
