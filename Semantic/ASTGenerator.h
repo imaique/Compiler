@@ -5,7 +5,33 @@
 #include <unordered_map>
 #include <unordered_set>
 
+namespace ASTConstants {
+	const string any = "";
+	const string Id = "Id";
+	const string Type = "Type";
+	const string IntNum = "IntNum";
+	const string FloatNum = "FloatNum";
+	const string OpType = "OpType";
 
+	const string FuncDef = "FuncDef";
+	const string Scope = "Scope";
+	const string ParamList = "ParamList";
+	const string AParamList = "AParamList";
+	const string StatBlock = "StatBlock";
+	const string AssignStat = "AssignStat";
+	const string FuncCallStat = "FuncCallStat";
+	const string VarDecl = "VarDecl";
+	const string Variable = "Variable";
+	const string Operation = "Operation";
+	const string DotList = "DotList";
+	const string FuncCall = "FuncCall";
+	const string Dim = "Dim";
+	const string DimList = "DimList";
+	const string Statement = "Statement";
+	const string StatType = "StatType";
+	const string Sign = "Sign";
+	const string Visibility = "Visibility";
+}
 
 class ASTGenerator {
 private:
