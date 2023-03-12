@@ -501,7 +501,6 @@ void Parser::print_stack() {
 	}
 
 	ss << std::endl;
-	std::cout << ss.str();
 	derivation_file << ss.str();
 }
 
@@ -627,7 +626,7 @@ void Parser::print_errors(const Token& current_token) {
 
 void Parser::skip_errors(Token& current_token) {
 
-	std::cout << "syntax error at " << current_token.line_location << " from " << current_token.lexeme << std::endl;
+	//std::cout << "syntax error at " << current_token.line_location << " from " << current_token.lexeme << std::endl;
 	//error_file << "syntax error at " << current_token.line_location << " from a " << Token::get_string(current_token.token_type) << " (\"" << current_token.lexeme << "\")" << std::endl;
 
 	print_errors(current_token);
