@@ -55,7 +55,6 @@ bool ASTGenerator::top_in_shape(std::unordered_map<std::string, int>& current_sh
 	if (m_stack.empty() || !m_stack.top()) return false;
 	string top_type = m_stack.top()->type;
 	if (current_shape.count(top_type)) {
-		std::cout << current_shape[top_type] << " " << top_type << std::endl;
 		return current_shape[top_type]--;
 	}
 	return false;
@@ -127,7 +126,7 @@ bool ASTGenerator::perform_semantic_action(std::string action, const Token& toke
 			}
 		}
 
-
+		std::reverse(children.begin(), children.end());
 
 		new_node = new AST(type, children);
 		m_stack.push(new_node);
@@ -156,6 +155,7 @@ void ASTGenerator::convert_dot_lists(AST* node) {
 			node->type = "Dot";
 		}
 		else {
+			std::reverse(children.begin(), children.end());
 			AST* new_node = create_dot(children);
 			*node = *(new_node);
 		}
