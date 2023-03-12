@@ -21,8 +21,7 @@ void traverse_ast(AST* node, int& unique, std::ofstream& dot_file) {
 
     if (!node->is_leaf) {
         if (node->children.size()) {
-            for (int i = node->children.size() - 1; i >= 0; i--) {
-                AST* child_node = node->children[i];
+            for (AST* child_node : node->children) {
                 dot_file << node_id << "->" << unique << ";";
                 traverse_ast(child_node, unique, dot_file);
             }
