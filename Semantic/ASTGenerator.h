@@ -13,7 +13,10 @@ namespace ASTConstants {
 	const string FloatNum = "FloatNum";
 	const string OpType = "OpType";
 
+	const string ISA = "isa";
+	const string Class = "Class";
 	const string FuncDef = "FuncDef";
+	const string FuncDecl = "FuncDecl";
 	const string Scope = "Scope";
 	const string ParamList = "ParamList";
 	const string AParamList = "AParamList";
