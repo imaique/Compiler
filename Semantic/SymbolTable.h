@@ -17,16 +17,17 @@ public:
 	virtual ~SymbolType() = default;
 };
 
-class FunctionSymbolType : SymbolType {
+class FunctionSymbolType : public SymbolType {
 	std::string get_signature(std::vector<SymbolType> param_types);
 public:
 	std::vector<SymbolType> param_types;
 	const std::string signature;
 
-	FunctionSymbolType(std::string return_type, std::vector<int> return_dimensions, std::vector<SymbolType> param_types);
+	FunctionSymbolType(std::string return_type, std::vector<SymbolType> param_types);
 
 	friend std::ostream& operator<<(std::ostream& os, const FunctionSymbolType& type);
 	
+	~FunctionSymbolType() = default;
 	//std::string get_signature();
 };
 
@@ -34,7 +35,8 @@ public:
 class SymbolTableEntry {
 public:
 	enum class Kind {
-		Function,
+		FuncDecl,
+		FuncDef,
 		Class,
 		Parameter,
 		Data,
@@ -70,7 +72,7 @@ class SymbolTable {
 	void print_table(std::ostream& os, std::string prefix) const;
 
 public:
-	SymbolTableEntry* get_entry(std::string name, SymbolTableEntry::Kind kind);
+	SymbolTableEntry* get_entry(std::string name);
 	SymbolTableEntry* add_entry_if_new(SymbolTableEntry* entry);
 	void add_entry(SymbolTableEntry* entry);
 

@@ -9,7 +9,8 @@ using std::endl;
 
 const std::unordered_map<STE::Kind, std::string> SymbolTableEntry::kind_strings{
 		{Kind::Class, "class"},
-		{Kind::Function, "function"},
+		{Kind::FuncDecl, "function"},
+		{Kind::FuncDef, "function"},
 		{Kind::Parameter, "param"},
 		{Kind::Inherit, "inherit"},
 		{Kind::Data, "data"},
@@ -27,7 +28,7 @@ const std::unordered_map<STE::Visibility, std::string> SymbolTableEntry::visibil
 std::ostream& operator<<(std::ostream& os, const SymbolType& type) {
 	os << type.type_id;
 	for (int dimension : type.dimensions) {
-		os << "[" << dimension << "]";
+		os << "[" << (dimension >= 0 ? std::to_string(dimension) : "") << "]";
 	}
 	return os;
 }
@@ -85,8 +86,8 @@ std::string FunctionSymbolType::get_signature(std::vector<SymbolType> param_type
 	return ss.str();
 }
 
-FunctionSymbolType::FunctionSymbolType(std::string return_type, std::vector<int> return_dimensions, std::vector<SymbolType> param_types) 
-	: SymbolType(return_type, return_dimensions), param_types(param_types), signature(get_signature(param_types)) {
+FunctionSymbolType::FunctionSymbolType(std::string return_type, std::vector<SymbolType> param_types) 
+	: SymbolType(return_type, vector<int>()), param_types(param_types), signature(get_signature(param_types)) {
 
 }
 
@@ -100,7 +101,7 @@ vector<vector<int>> SymbolTable::get_spaces() const {
 
 void SymbolTable::print_table(std::ostream& os, std::string prefix) const {
 	os << prefix << "table: " << name << endl;
-	std::cout << entries.size();
+	prefix += '\t';
 	for (const auto& pair : entries) {
 		SymbolTableEntry* entry = pair.second;
 		std::string kind_string = SymbolTableEntry::kind_strings.at(entry->kind);
@@ -145,18 +146,17 @@ SymbolTableEntry::SymbolTableEntry(std::string unique_id, std::string name, Kind
 
 }
 
-SymbolTableEntry* SymbolTable::get_entry(std::string unique_id, SymbolTableEntry::Kind kind) {
+SymbolTableEntry* SymbolTable::get_entry(std::string unique_id) {
 	if (!entries.count(unique_id)) return nullptr;
 
 	SymbolTableEntry* entry = entries.at(unique_id);
-
-	while (entry && entry->kind != kind) entry = entry->nextEntry;
 
 	return entry;
 }
 
 SymbolTableEntry* SymbolTable::add_entry_if_new(SymbolTableEntry* entry) {
-	SymbolTableEntry* duplicate_entry = this->get_entry(entry->unique_id, STE::Kind::Class);
+	if (!entry) return entry;
+	SymbolTableEntry* duplicate_entry = get_entry(entry->unique_id);
 
 	if (duplicate_entry) return duplicate_entry;
 
