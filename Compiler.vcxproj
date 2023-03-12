@@ -124,9 +124,6 @@
     <ClInclude Include="Semantic\SymbolTable.h" />
     <ClInclude Include="SyntaxAnalyzer\Parser.h" />
   </ItemGroup>
-  <ItemGroup>
-    <Text Include="file.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
