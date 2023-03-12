@@ -30,13 +30,16 @@
     <ClCompile Include="Semantic\ASTGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ASTdriver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Semantic\SemanticAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Semantic\AST.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Semantic\SymbolTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="semanticdriver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Semantic\AST.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Semantic\SymbolTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
