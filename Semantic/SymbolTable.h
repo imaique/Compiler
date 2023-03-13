@@ -68,12 +68,13 @@ public:
 
 class SymbolTable {
 	
-	std::unordered_map<std::string, SymbolTableEntry*> entries;
+	
 	std::vector<std::vector<int>> get_spaces() const;
 	void print_table(std::ostream& os, std::string prefix) const;
 
 public:
-	SymbolTableEntry* get_entry(std::string name);
+	std::unordered_map<std::string, SymbolTableEntry*> entries;
+	SymbolTableEntry* get_entry(std::string name) const;
 	SymbolTableEntry* add_entry_if_new(SymbolTableEntry* entry);
 	void add_entry(SymbolTableEntry* entry);
 
@@ -88,7 +89,7 @@ public:
 
 
 class SymbolTableClassEntry : public SymbolTableEntry {
-	std::unordered_map <std::string, std::string> inherited_members;
 public:
+	std::unordered_map <std::string, SymbolTableEntry*> inherited_members;
 	SymbolTableClassEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link);
 };

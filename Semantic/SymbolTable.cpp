@@ -156,7 +156,7 @@ SymbolTableEntry::SymbolTableEntry(std::string unique_id, std::string name, Kind
 
 }
 
-SymbolTableEntry* SymbolTable::get_entry(std::string unique_id) {
+SymbolTableEntry* SymbolTable::get_entry(std::string unique_id) const {
 	if (!entries.count(unique_id)) return nullptr;
 
 	SymbolTableEntry* entry = entries.at(unique_id);
