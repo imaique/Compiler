@@ -27,6 +27,10 @@ void SemanticAnalyzer::add_error(std::string text, int line) {
 	errors.push_back(error);
 }
 
+void SemanticAnalyzer::perform_semantic_checks(AST* root, SymbolTable* global_table) {
+
+}
+
 bool SemanticAnalyzer::analyze() {
 	ASTGenerator ast_generator(filename);
 	AST* root = ast_generator.get_AST();
@@ -37,6 +41,8 @@ bool SemanticAnalyzer::analyze() {
 	SymbolTable* global_table = construct_symbol_tables(root);
 	std::ofstream file("output/outsemantic/" + filename + ".outsymboltables");
 	file << *global_table;
+
+	perform_semantic_checks(root, global_table);
 
 	print_errors();
 	return true;
@@ -66,7 +72,7 @@ AST* SemanticAnalyzer::get_type(const vector <AST*>& list, std::string type) {
 	return nullptr;
 }
 
-SymbolTableEntry* SemanticAnalyzer::generate_class_entry(AST* class_node) {
+SymbolTableClassEntry* SemanticAnalyzer::generate_class_entry(AST* class_node) {
 
 	const vector<AST*>& children = class_node->children;
 
@@ -106,8 +112,28 @@ SymbolTableEntry* SemanticAnalyzer::generate_class_entry(AST* class_node) {
 		}
 	}
 
+	const AST* isa_node = get_type(children, ISA);
 
-	return new SymbolTableEntry(name, name, STE::Kind::Class, nullptr, line_location, STE::Visibility::None, class_table);
+	if (isa_node) {
+		for (AST* parent : isa_node->children) {
+			SymbolTableEntry* entry = generate_inherit_entry(parent);
+
+			SymbolTableEntry* duplicate_entry = class_table->add_entry_if_new(entry);
+
+			if (entry != duplicate_entry) {
+				add_error("Inheriting from the same class " + entry->name + " more than once.", line_location);
+			}
+		}
+	}
+
+
+	return new SymbolTableClassEntry(name, name, STE::Kind::Class, nullptr, line_location, STE::Visibility::None, class_table);
+}
+SymbolTableEntry* SemanticAnalyzer::generate_inherit_entry(AST* id_node) {
+	const string name = id_node->value;
+	const int line_location = id_node->token->line_location;
+	return new SymbolTableEntry(name + ' ', name, EntryKind::Inherit, nullptr, line_location, STE::Visibility::None, nullptr);
+
 }
 
 SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE::Kind func_kind, string parent_class) {
@@ -243,15 +269,20 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 
 	const vector<AST*> func_defs = get_types(children, FuncDef);
 
+	vector<SymbolTableClassEntry*> class_entries;
+
 	// Start with classes so that you can add method definitions to the classes' symbol tables
 	for (AST* class_decl : class_decls) {
-		SymbolTableEntry* entry = generate_class_entry(class_decl);
+		SymbolTableClassEntry* entry = generate_class_entry(class_decl);
 
 		SymbolTableEntry* duplicate_entry = global_table->add_entry_if_new(entry);
 
 		// there's already a class of this name
 		if (duplicate_entry != entry) {
 			cout << "The class " << entry->name << " declared at line " << entry->line_location << " has already been declared at line " << duplicate_entry->line_location << "." << endl;
+		}
+		else {
+			class_entries.push_back(entry);
 		}
 	}
 
@@ -308,6 +339,9 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 		}
 	}
 
+	for (SymbolTableClassEntry* class_entry : class_entries) {
+
+	}
 
 	return global_table;
 
