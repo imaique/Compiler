@@ -11,6 +11,7 @@ using std::endl;
 using std::vector;
 using std::to_string;
 using std::unordered_set;
+using std::unordered_map;
 typedef SymbolTableEntry::Kind EntryKind;
 
 using namespace ASTConstants;
@@ -24,16 +25,70 @@ SemanticAnalyzer::SemanticError::SemanticError(std::string text, int line_locati
 }
 
 void SemanticAnalyzer::add_error(std::string text, int line) {
-	SemanticError error(text, line);
+	SemanticError error("Error: " + text, line);
 	errors.push_back(error);
 }
 
 void SemanticAnalyzer::add_warning(std::string text, int line) {
-	SemanticError warning(text, line);
+	SemanticError warning("Warning: " + text, line);
 	warnings.push_back(warning);
 }
 
 void SemanticAnalyzer::perform_semantic_checks(AST* root, SymbolTable* global_table) {
+	check_function_names(global_table);
+}
+
+void SemanticAnalyzer::check_function_names(SymbolTable* global_table) {
+	vector<SymbolTable*> tables_to_check;
+	tables_to_check.push_back(global_table);
+
+	for (const auto& pair : global_table->entries) {
+		SymbolTableEntry* entry = pair.second;
+		if (entry->kind == EntryKind::Class) {
+			tables_to_check.push_back(entry->link);
+		}
+	}
+
+	for (SymbolTable* table : tables_to_check) {
+		unordered_map<string, vector<string>> functions;
+
+		for (const auto& pair : table->entries) {
+			SymbolTableEntry* entry = pair.second;
+			if (entry->kind == EntryKind::FuncDef) {
+				string function_name = entry->name;
+				string function_id = entry->unique_id;
+				if (!functions.count(function_name)) functions.insert({ function_name, vector<string>() });
+
+				vector<string>& func_id_list = functions.at(function_name);
+				func_id_list.push_back(function_id);
+			}
+		}
+
+		for (const auto& pair : functions) {
+			const vector<string>& func_id_list = pair.second;
+			const string function_name = pair.first;
+
+			if (func_id_list.size() > 1) {
+				
+				std::stringstream ss;
+				bool first = true;
+				for (string function_id : func_id_list) {
+					if (first) first = false;
+					else ss << ", ";
+					ss << function_id;
+				}
+
+				if (function_name == "main" && table->name == "global") {
+					add_error("Multiple main functions with different signatures: " + ss.str() + ".", -1);
+				}
+				else {
+					add_warning("Function " + (table->name == "global" ? "" : table->name + "::") + function_name + " overloaded: " + ss.str() + ".", -1);
+				}
+			}
+		}
+	}
+
+
 
 }
 
@@ -66,7 +121,11 @@ void SemanticAnalyzer::print_errors() {
 	errors_warnings.insert(errors_warnings.end(), warnings.begin(), warnings.end());
 	std::sort(errors_warnings.begin(), errors_warnings.end());
 
-	for (SemanticError error : errors_warnings) file << error.text << " (line " << error.line_location  << ")" << endl;
+	for (SemanticError error : errors_warnings) {
+		file << error.text;
+		if(error.line_location >= 0) file << " (line " << error.line_location << ")";
+		file << endl;
+	}
 }
 
 
@@ -143,7 +202,6 @@ SymbolTableEntry* SemanticAnalyzer::generate_inherit_entry(AST* id_node) {
 	const string name = id_node->value;
 	const int line_location = id_node->token->line_location;
 	return new SymbolTableEntry(name + ' ', name, EntryKind::Inherit, nullptr, line_location, STE::Visibility::None, nullptr);
-
 }
 
 SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE::Kind func_kind, string parent_class) {
@@ -269,7 +327,6 @@ vector<int> SemanticAnalyzer::get_dimensions(const std::vector <AST*> dimension_
 	return dimensions;
 }
 
-
 SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 	SymbolTable* global_table = new SymbolTable("global");
 
@@ -295,6 +352,8 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 			class_entries.push_back(entry);
 		}
 	}
+
+	bool main_func = false;
 
 	for (AST* func_def : func_defs) {
 		AST* scope = get_type(func_def->children, Scope);
@@ -340,6 +399,7 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 		}
 		else {
 			SymbolTableEntry* entry = generate_function_entry(func_def, STE::Kind::FuncDef, "error");
+			if (entry->name == "main") main_func = true;
 
 			SymbolTableEntry* duplicate_entry = global_table->add_entry_if_new(entry);
 
@@ -348,6 +408,8 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 			}
 		}
 	}
+
+	if (!main_func) add_error("Missing main function.", -1);
 
 	unordered_set<SymbolTableClassEntry*> augmented_classes;
 	for (SymbolTableClassEntry* class_entry : class_entries) {
@@ -367,7 +429,7 @@ void SemanticAnalyzer::pull_members(SymbolTableClassEntry* class_entry, SymbolTa
 			string member_unique_id = parent_member->unique_id;
 			SymbolTableEntry* main_dup_entry = child_table->get_entry(member_unique_id);
 			if (main_dup_entry) {
-				add_warning("Member " + member_unique_id + " in " + class_entry->name + " is overriding a member in " + parent_entry->name + ".", main_dup_entry->line_location);
+				add_warning("Member " + member_unique_id + " in " + class_entry->name + " is overriding the one defined in " + parent_entry->name + ".", main_dup_entry->line_location);
 			}
 			else {
 				if (class_entry->inherited_members.count(member_unique_id)) {
@@ -401,6 +463,7 @@ void SemanticAnalyzer::traverse_parents(SymbolTableClassEntry* class_entry, unor
 		if (inherit_entry->kind == EntryKind::Inherit) {
 			SymbolTableEntry* parent_entry = global_table->get_entry(inherit_entry->name);
 			if (parent_entry) {
+				// could add link to inherit to class if u want
 				SymbolTableClassEntry* parent_class_entry = static_cast<SymbolTableClassEntry*>(parent_entry);
 				traverse_parents(parent_class_entry, augmented_classes, current_path, global_table);
 				pull_members(class_entry, parent_class_entry);
