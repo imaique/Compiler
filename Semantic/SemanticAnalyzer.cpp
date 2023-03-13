@@ -1,7 +1,7 @@
 #include "SemanticAnalyzer.h"
 #include "ASTGenerator.h"
 #include <algorithm>
-
+#include <sstream>
 
 
 using std::string;
@@ -10,6 +10,7 @@ using std::cout;
 using std::endl;
 using std::vector;
 using std::to_string;
+using std::unordered_set;
 typedef SymbolTableEntry::Kind EntryKind;
 
 using namespace ASTConstants;
@@ -25,6 +26,11 @@ SemanticAnalyzer::SemanticError::SemanticError(std::string text, int line_locati
 void SemanticAnalyzer::add_error(std::string text, int line) {
 	SemanticError error(text, line);
 	errors.push_back(error);
+}
+
+void SemanticAnalyzer::add_warning(std::string text, int line) {
+	SemanticError warning(text, line);
+	warnings.push_back(warning);
 }
 
 void SemanticAnalyzer::perform_semantic_checks(AST* root, SymbolTable* global_table) {
@@ -55,9 +61,12 @@ bool operator<(const SemanticAnalyzer::SemanticError& e1, const SemanticAnalyzer
 
 void SemanticAnalyzer::print_errors() {
 	std::ofstream file("output/outsemantic/" + filename + ".outsemanticerrors");
-	std::sort(errors.begin(), errors.end());
+	vector<SemanticError> errors_warnings;
+	errors_warnings.insert(errors_warnings.end(), errors.begin(), errors.end());
+	errors_warnings.insert(errors_warnings.end(), warnings.begin(), warnings.end());
+	std::sort(errors_warnings.begin(), errors_warnings.end());
 
-	for (SemanticError error : errors) file << error.text << " (line " << error.line_location  << ")" << endl;
+	for (SemanticError error : errors_warnings) file << error.text << " (line " << error.line_location  << ")" << endl;
 }
 
 
@@ -129,6 +138,7 @@ SymbolTableClassEntry* SemanticAnalyzer::generate_class_entry(AST* class_node) {
 
 	return new SymbolTableClassEntry(name, name, STE::Kind::Class, nullptr, line_location, STE::Visibility::None, class_table);
 }
+
 SymbolTableEntry* SemanticAnalyzer::generate_inherit_entry(AST* id_node) {
 	const string name = id_node->value;
 	const int line_location = id_node->token->line_location;
@@ -339,11 +349,67 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 		}
 	}
 
+	unordered_set<SymbolTableClassEntry*> augmented_classes;
 	for (SymbolTableClassEntry* class_entry : class_entries) {
-
+		unordered_set<SymbolTableClassEntry*> current_path;
+		traverse_parents(class_entry, augmented_classes, current_path, global_table);
 	}
 
 	return global_table;
+}
 
+void SemanticAnalyzer::pull_members(SymbolTableClassEntry* class_entry, SymbolTableClassEntry* parent_entry) {
+	SymbolTable* child_table = class_entry->link;
 
+	for (const auto& entry_pair : parent_entry->link->entries) {
+		SymbolTableEntry* parent_member = entry_pair.second;
+		if (parent_member->kind == EntryKind::Data || parent_member->kind == EntryKind::FuncDef || parent_member->kind == EntryKind::FuncDef) {
+			string member_unique_id = parent_member->unique_id;
+			SymbolTableEntry* main_dup_entry = child_table->get_entry(member_unique_id);
+			if (main_dup_entry) {
+				add_warning("Member " + member_unique_id + " in " + class_entry->name + " is overriding a member in " + parent_entry->name + ".", main_dup_entry->line_location);
+			}
+			else {
+				if (class_entry->inherited_members.count(member_unique_id)) {
+					add_error("Ambiguity inheriting member " + member_unique_id + " in " + class_entry->name + " since it exists in two or more inherited classes.", class_entry->line_location);
+				}
+				else {
+					class_entry->inherited_members.insert({ parent_member->unique_id, parent_member });
+				}
+			}
+		}
+	}
+
+}
+
+void SemanticAnalyzer::traverse_parents(SymbolTableClassEntry* class_entry, unordered_set<SymbolTableClassEntry*>& augmented_classes, unordered_set<SymbolTableClassEntry*>& current_path, const SymbolTable* global_table) {
+	if (augmented_classes.count(class_entry)) return;
+	if (current_path.count(class_entry)) {
+		std::stringstream ss;
+		bool first = true;
+		for (SymbolTableClassEntry* visited_class : current_path) {
+			if (first) first = false;
+			else ss << ", ";
+			ss << visited_class->name;
+		}
+		add_error("Circular inheritance found: " + ss.str(), class_entry->line_location);
+		return;
+	}
+	current_path.insert(class_entry);
+	for (const auto& entry_pair : class_entry->link->entries) {
+		SymbolTableEntry* inherit_entry = entry_pair.second;
+		if (inherit_entry->kind == EntryKind::Inherit) {
+			SymbolTableEntry* parent_entry = global_table->get_entry(inherit_entry->name);
+			if (parent_entry) {
+				SymbolTableClassEntry* parent_class_entry = static_cast<SymbolTableClassEntry*>(parent_entry);
+				traverse_parents(parent_class_entry, augmented_classes, current_path, global_table);
+				pull_members(class_entry, parent_class_entry);
+			} else{
+				add_error("Class " + class_entry->name + " cannot inherit from non-existent class " + inherit_entry->name + ".", class_entry->line_location);
+			}
+		}
+	}
+	current_path.erase(class_entry);
+	augmented_classes.insert(class_entry);
+	return;
 }
