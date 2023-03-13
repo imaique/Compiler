@@ -1,6 +1,7 @@
 #include "SymbolTable.h"
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 
 using std::string;
 typedef SymbolTableEntry STE;
@@ -100,10 +101,19 @@ vector<vector<int>> SymbolTable::get_spaces() const {
 }
 
 void SymbolTable::print_table(std::ostream& os, std::string prefix) const {
+
+	static constexpr auto comp = [](SymbolTableEntry* e1, SymbolTableEntry* e2) { return e1->line_location < e2->line_location; };
+
 	os << prefix << "table: " << name << endl;
 	prefix += '\t';
+	vector<SymbolTableEntry*> sorted_entries;
 	for (const auto& pair : entries) {
 		SymbolTableEntry* entry = pair.second;
+		sorted_entries.push_back(entry);
+	}
+	std::sort(sorted_entries.begin(), sorted_entries.end(), comp);
+
+	for (SymbolTableEntry* entry : sorted_entries) {
 		std::string kind_string = SymbolTableEntry::kind_strings.at(entry->kind);
 		os << prefix << kind_string << "\t| " << entry->name;
 
@@ -162,4 +172,9 @@ SymbolTableEntry* SymbolTable::add_entry_if_new(SymbolTableEntry* entry) {
 
 	this->add_entry(entry);
 	return entry;
+}
+
+SymbolTableClassEntry::SymbolTableClassEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link) :
+	SymbolTableEntry(unique_id, name, kind, type, line_location, visibility, link) {
+
 }

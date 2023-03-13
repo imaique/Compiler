@@ -63,6 +63,7 @@ public:
 	//SymbolTableEntry(std::string name, Kind kind, std::string type);
 	SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link);
 
+	
 };
 
 class SymbolTable {
@@ -86,6 +87,8 @@ public:
 
 
 
-class SymbolTableClassEntry : SymbolTableEntry {
+class SymbolTableClassEntry : public SymbolTableEntry {
 	std::unordered_map <std::string, std::string> inherited_members;
+public:
+	SymbolTableClassEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link);
 };
