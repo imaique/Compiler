@@ -53,6 +53,13 @@ void SemanticAnalyzer::check_types(AST* root, SymbolTable* global_table) {
 		const string class_name = class_table ? class_table->name : "none";
 		const SymbolType constructor_type(class_name, vector<int>());
 		const SymbolTableEntry* function_entry = func_def->decorator.function_entry;
+
+		
+		if (!function_entry) {
+			const AST* id_node = get_type(func_def->children, Id);
+			add_error("Cannot perform a semantic analysis of " + id_node->value + " because of missing declaration(s) and/or missing definition(s).", func_def->line_start);
+			continue;
+		}
 		AST* stat_block = get_type(func_def->children, StatBlock);
 		SymbolType return_type = resolve_type(stat_block, function_entry, class_table, global_table);
 		cout << function_entry->unique_id << " " << return_type << endl;
@@ -80,6 +87,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 }
 
 SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* function_entry, const SymbolTable* class_table, const SymbolTable* global_table, const SymbolTable* dot_class_table) {
+	// why is function_entry sometimes nullptr
 	SymbolTable* function_table = function_entry->link;
 
 	vector<AST*> children = node->children;
@@ -140,6 +148,11 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 	else if (node_type == Variable) {
 		AST* id_node = get_type(node->children, Id);
 		std::string variable_name = id_node->value;
+
+		if (variable_name == "self") {
+			add_error("Incorrect use of self.", line_start);
+			return SymbolType::INVALID;
+		}
 
 		SymbolTableEntry* variable_entry = nullptr;
 
@@ -222,7 +235,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			return *function_entry->type;
 		}
 		else {
-			add_error("Reference to undeclared function " + unique_id + ".", node->line_start);
+			add_error("Reference to undeclared or undefined function " + unique_id + ".", node->line_start);
 			return SymbolType::INVALID;
 		}
 
@@ -620,7 +633,7 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 			SymbolTableEntry* duplicate_entry = func_table->add_entry_if_new(entry);
 
 			if (entry != duplicate_entry) {
-				add_error("There already exists a variable or parameter of the name " + entry->name + " at line " + to_string(duplicate_entry->line_location) + ".", line_location);
+				add_error("There already exists a variable or parameter of the name " + entry->name + " at line " + to_string(duplicate_entry->line_location) + ".", localvar->line_start);
 			}
 		}
 	}
@@ -691,10 +704,10 @@ vector<int> SemanticAnalyzer::get_dimensions(const std::vector <AST*> dimension_
 	return dimensions;
 }
 
-SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
+SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* root) {
 	SymbolTable* global_table = new SymbolTable("global");
 
-	const vector<AST*>& children = node->children;
+	const vector<AST*>& children = root->children;
 
 	const vector<AST*> class_decls = get_types(children, Class);
 
@@ -710,7 +723,9 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 
 		// there's already a class of this name
 		if (duplicate_entry != entry) {
-			cout << "The class " << entry->name << " declared at line " << entry->line_location << " has already been declared at line " << duplicate_entry->line_location << "." << endl;
+			stringstream ss;
+			ss << "The class " << entry->name << " has already been declared at line " << duplicate_entry->line_location << ".";
+			add_error(ss.str(), entry->line_location);
 		}
 		else {
 			class_entries.push_back(entry);
