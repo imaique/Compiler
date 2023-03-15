@@ -1,5 +1,6 @@
 #pragma once
 #include "../LexicalAnalyzer/Token.h"
+#include "Decorator.h"
 
 class AST {
 public:
@@ -14,4 +15,7 @@ public:
 	bool is_leaf;
 	std::string value;
 	std::vector<AST*> children;
+	Decorator decorator;
+	int line_start;
 };
+
