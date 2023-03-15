@@ -1,0 +1,166 @@
+// ====== Class declarations ====== //
+class POLYNOMIAL {
+	public function evaluate: (x: float) => float;
+	public function evaluate2: (x: float) => float;                       // 6.2
+};
+class POLYNOMIAL {                                                      // 8.1
+	public function evaluate: (x: float) => float;                        
+  public function evaluate: (x: integer) => integer;                    // 9.2
+};
+class LINEAR isa POLYNOMIAL {
+	private attribute a: float;
+	private attribute b: float;
+	private attribute b: integer;                                       // 8.3
+	
+	public constructor: (A: float, B: float);
+	public function evaluate: (x: float) => float;                      // 9.3
+};
+
+class QUADRATIC isa POLYNOMIAL {
+	private attribute a: float;                                         // 8.5
+	private attribute b: float;                                         // 8.5
+	private attribute c: float;
+	
+	public constructor: (A: float, B: float, C: float);
+	public function evaluate: (x: float) => float;                      // 9.3
+};
+
+class C isa E {
+	private attribute a: integer; 
+};
+
+class D isa C {
+	private attribute b: integer; 
+};
+
+class E isa D {                                                         // 14.1
+	private attribute c: integer; 
+};
+
+
+// ====== member function implementations ====== //
+function POLYNOMIAL::evaluate(x: float) => float
+  {
+    return (0);
+  }
+
+
+function LINEAR::constructor(A: float, B: float)
+  {
+    localvar new_function: LINEAR;
+    new_function.a = A;
+    new_function.b = B;
+    return (new_function);
+  }
+  
+function LINEAR::evaluate(x: float) => float 
+  {
+    localvar result: float;
+    result = 0.0;
+    result = a * x + b;
+    return (result);
+  }
+
+function QUADRATIC::evaluate(x: float) => float
+  {
+    localvar result: float;
+    //Using Horner's method
+    result = a;
+    result = result * x + b;
+    result = result * x + c;
+	result = self.a;
+	result = a.self;                                                       // 15.2
+    return (result);
+  }
+  
+function QUADRATIC::constructor(B: float, C: float)
+  {
+    localvar new_function: QUADRATIC ;
+    new_function.a = A + B * 3;                                            // 10.1
+    new_function.b = B;
+    new_function.c = 1;                                                    // 10.2 
+    return (1);                                                            // 10.3
+  }
+  
+function QUADRATIC::build2(A: float, B: float, C: float) => QUADRATIC      // 6.1
+  {
+    localvar new_function: QUADRATIC;
+    new_function.a = A;
+    new_function.b = B;
+    new_function.c = C;
+    return (new_function);
+  }
+  
+function f(i: integer) => void {}                                                    
+function f(i: integer) => void {}                                          // 8.2
+function f(i: integer, j: integer) => integer {}                           // 9.1
+
+function f3(p1: integer[2][3]) => integer {}
+
+
+// ====== main ====== //
+function main() => void
+{
+  localvar a: a;                                                           // 11.5
+  localvar c: C;
+  localvar f1: LINEAR;
+  localvar f2: QUADRATIC;
+  localvar counter: integer;
+  localvar counter: float;                                                 // 8.4
+  localvar i: integer[2][3];
+  localvar j: integer[1][2][3];
+  f1 = f1.build(2, 3.5);
+  f2 = f2.build(-2.0, 1.0, 0.0);
+  c.b = 1;                                                                 // 11.2
+  counter = c.f();                                                         // 11.3
+  undefined();                                                             // 11.4
+  counter = a;                                                             // 11.1
+  f(1,1,1);                                                                // 12.1
+  f(1.2,1);                                                                // 12.2	
+  i[2] = 1;                                                                // 13.1
+  i[2][1.3] = 2;                                                           // 13.2
+  f3(j);                                                                   // 13.3
+  counter.x = 1;                                                           // 15.1
+  counter = self;                                                          // 15.2
+  while(counter <= 10)
+  {
+    write(counter);
+    write(f1.evaluate(counter));
+    write(f2.evaluate(counter));
+  };
+}
+
+/*
+1.   |X| Global symbol table 
+2.   |X| Class symbol table
+3.1  |X| Class data member
+3.2  |X| Function's local variable
+4.1  |X| Free function
+4.2  |X| Member function
+6.1  |X| Undeclared member function definition
+6.2  |X| Undefined member function declaration
+8.1  |X| Multiply declared class
+8.2  |X| Multiply defined free function
+8.3  |X| Multiply declared identifier in class
+8.4  |X| Multiply declared identifier in function
+8.5  |X| Shadowed inherited data member
+9.1  |X| Overloaded free function
+9.2  |X| Overloaded member function
+9.3  |X| Overridden inherited member function
+10.1 |X| Type error in expression
+10.2 |X| Type error in assignment statement 
+10.3 |X| Type error in return statement
+11.1 |X| Undeclared local variable
+11.2 |X| Undeclared data member
+11.3 |X| Undeclared member function
+11.4 |X| Undeclared free function
+11.5 |X| Undeclared class
+12.1 |X| function call with wrong number of parameters
+12.2 |X| function call with wrong type of parameters
+13.1 |X| Use of array with wrong number of dimensions
+13.2 |X| Array index is not an integer
+13.3 |X| Array parameter using wrong number of dimensions
+14.1 |X| Circular class dependency
+15.1 |X| "." operator used on non-class type
+15.2 |X| incorrect use of "self" 
+*/

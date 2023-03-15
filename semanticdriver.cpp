@@ -4,7 +4,7 @@
 #include <filesystem>
 
 int main() {
-    std::vector<std::string> test_files{ "syntax-func", "example-polynomial", "example-bubblesort" };//, "full-coverage" };
+    std::vector<std::string> test_files{ "polynomialsemanticerrors", };// "syntax-func", "example-polynomial", "example-bubblesort" , };//, "full-coverage" };
 
     for (auto filename : test_files) {
         std::string source_file = "input/" + filename + ".src";
