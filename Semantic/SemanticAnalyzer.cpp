@@ -12,9 +12,15 @@ using std::vector;
 using std::to_string;
 using std::unordered_set;
 using std::unordered_map;
+using std::stringstream;
 typedef SymbolTableEntry::Kind EntryKind;
 
 using namespace ASTConstants;
+
+SymbolType stat_return(SymbolType type) {
+	if (type == SymbolType::INVALID) return type;
+	else return SymbolType::OK;
+}
 
 SemanticAnalyzer::SemanticAnalyzer(string filename) : filename(filename) {
 
@@ -36,6 +42,340 @@ void SemanticAnalyzer::add_warning(std::string text, int line) {
 
 void SemanticAnalyzer::perform_semantic_checks(AST* root, SymbolTable* global_table) {
 	check_function_names(global_table);
+	check_types(root, global_table);
+}
+
+void SemanticAnalyzer::check_types(AST* root, SymbolTable* global_table) {
+	vector<AST*> func_defs = get_types(root->children, FuncDef);
+
+	for (AST* func_def : func_defs) {
+		const SymbolTable* class_table = func_def->decorator.class_entry ? func_def->decorator.class_entry->link : nullptr;
+		const string class_name = class_table ? class_table->name : "none";
+		const SymbolType constructor_type(class_name, vector<int>());
+		const SymbolTableEntry* function_entry = func_def->decorator.function_entry;
+		AST* stat_block = get_type(func_def->children, StatBlock);
+		SymbolType return_type = resolve_type(stat_block, function_entry, class_table, global_table);
+		cout << function_entry->unique_id << " " << return_type << endl;
+		if ((return_type != *function_entry->type) && (constructor_type != *function_entry->type) && !(return_type == SymbolType::OK && *function_entry->type == SymbolType::VOID)) {
+			add_error("Missing valid return statement in function " + function_entry->unique_id, func_def->line_start);
+			cout << *function_entry->type << endl;
+		}
+		/*
+		cout << func_def->decorator.function_entry->unique_id << endl;
+		for (AST* statement : stat_block->children) {
+			if (statement->type != VarDecl) {
+				cout << resolve_type(statement, function_entry, class_table, global_table) << endl;
+			}
+		}
+		*/
+	}
+}
+
+bool SemanticAnalyzer::same_type(SymbolType t1, SymbolType t2) {
+	return t1 == t2 && t1 != SymbolType::INVALID;
+}
+
+SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* function_entry, const SymbolTable* class_table, const SymbolTable* global_table) {
+	return resolve_type(node, function_entry, class_table, global_table, nullptr);
+}
+
+SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* function_entry, const SymbolTable* class_table, const SymbolTable* global_table, const SymbolTable* dot_class_table) {
+	SymbolTable* function_table = function_entry->link;
+
+	vector<AST*> children = node->children;
+	string node_type = node->type;
+	const int line_start = node->line_start;
+
+	if (node_type == VarDecl) {
+		AST* id_node = get_type(node->children, Id);
+		std::string variable_name = id_node->value;
+
+		AST* type_node = get_type(node->children, Type);
+		std::string type_name = type_node->value;
+
+		SymbolTableEntry* variable_entry = function_table->get_entry(variable_name);
+
+		if (!variable_entry) {
+			add_error("Cannot declare variable of an non-existent class \"" + type_name + "\".", node->line_start);
+			return SymbolType::INVALID;
+		}
+
+		const AST* dim_list = get_type(children, DimList);
+
+		const AST* param_list = get_type(children, AParamList);
+
+		if (dim_list) {
+			vector<int> dimensions;
+			for (AST* dim : dim_list->children) {
+				SymbolType dim_type = resolve_type(dim, function_entry, class_table, global_table);
+				if (dim_type != SymbolType::INTEGER) {
+					add_error("Indices must be of integer type.", node->line_start);
+					return SymbolType::INVALID;
+				}
+				dimensions.push_back(-1);
+			}
+		}
+		else if (param_list) {
+			vector<SymbolType> parameters;
+			for (AST* param : param_list->children) {
+				SymbolType param_type = resolve_type(param, function_entry, class_table, global_table);
+				parameters.push_back(param_type);
+			}
+
+			const string signature = FunctionSymbolType::get_signature(parameters);
+
+			const string unique_id = type_name + signature;
+
+			SymbolTableEntry* variable_class_entry = global_table->get_entry(type_name);
+			SymbolTableEntry* constructor_entry = variable_class_entry->link->get_entry(unique_id);
+
+			if (!constructor_entry) {
+				add_error("There doesn't exist a constructor with signature " + signature + " for class " + type_name + ".", line_start);
+				return SymbolType::INVALID;
+			}
+		}
+
+		return SymbolType::OK;
+	}
+	else if (node_type == Variable) {
+		AST* id_node = get_type(node->children, Id);
+		std::string variable_name = id_node->value;
+
+		SymbolTableEntry* variable_entry = nullptr;
+
+		if (dot_class_table) {
+			variable_entry = dot_class_table->get_entry(variable_name);
+		}
+		else {
+			variable_entry = function_table->get_entry(variable_name);
+
+			if (!variable_entry && class_table) variable_entry = class_table->get_entry(variable_name);
+		}
+
+		if (variable_entry) {
+
+			const AST* dim_list = get_type(children, DimList);
+
+			vector<int> dimensions;
+			for (AST* dim : dim_list->children) {
+				SymbolType dim_type = resolve_type(dim, function_entry, class_table, global_table);
+				//cout << "wtf " << dim_type;
+				if (dim_type != SymbolType::INTEGER) {
+					add_error("Indices must be of integer type.", node->line_start);
+					return SymbolType::INVALID;
+				}
+				dimensions.push_back(-1);
+			}
+			
+
+			SymbolType variable_type(*variable_entry->type);
+
+			vector<int> variable_dimensions = variable_type.dimensions;
+
+			for (int dimension : dimensions) {
+				if (variable_dimensions.empty()) {
+					stringstream ss;
+					ss << "Variable " + variable_name + " of type " << variable_type << " does not support a " << dimensions.size() << "-dimensonal access.";
+					add_error(ss.str(), node->line_start);
+					return SymbolType::INVALID;
+				}
+				variable_dimensions.pop_back();
+			}
+
+			node->decorator.set_type(SymbolType(variable_type.type_id, variable_dimensions));
+			return node->decorator.get_type();
+		}
+		else {
+			add_error("Reference to undeclared variable " + variable_name + ".", node->line_start);
+			return SymbolType::INVALID;
+		}
+	}
+	else if (node_type == FuncCall) {
+
+		AST* id = get_type(children, Id);
+
+		string func_id = id->value;
+
+		AST* param_list = get_type(children, AParamList);
+
+		vector<SymbolType> parameters;
+		for (AST* param : param_list->children) {
+			SymbolType param_type = resolve_type(param, function_entry, class_table, global_table);
+			parameters.push_back(param_type);
+		}
+
+		const string signature = FunctionSymbolType::get_signature(parameters);
+
+		const string unique_id = func_id + signature;
+
+		SymbolTableEntry* function_entry = nullptr;
+
+		if (dot_class_table) {
+			function_entry = dot_class_table->get_entry(unique_id);
+		}
+		else {
+			if(class_table) function_entry = class_table->get_entry(unique_id);
+			if (!function_entry) function_entry = global_table->get_entry(unique_id);
+		}
+
+		if (function_entry) {
+			return *function_entry->type;
+		}
+		else {
+			add_error("Reference to undeclared function " + unique_id + ".", node->line_start);
+			return SymbolType::INVALID;
+		}
+
+	}
+	else if (node_type == IntNum || node_type == FloatNum) {
+		return node_type == IntNum ? SymbolType::INTEGER : SymbolType::FLOAT;
+	}
+	else if (node_type == Factor) {
+		return resolve_type(children[1], function_entry, class_table, global_table);
+	}
+	else if (node_type == Operation) {
+		SymbolType t1 = resolve_type(children[0], function_entry, class_table, global_table);
+		SymbolType t2 = resolve_type(children[2], function_entry, class_table, global_table);
+
+		if (!same_type(t1, t2)) {
+			add_error("Types are not the same on both sides of the operation.", node->line_start);
+			return SymbolType::INVALID;
+		}
+		return t1;
+	}
+	else if (node_type == AssignStat) {
+		SymbolType t1 = resolve_type(children[0], function_entry, class_table, global_table);
+		SymbolType t2 = resolve_type(children[1], function_entry, class_table, global_table);
+
+		if (!same_type(t1, t2)) {
+			add_error("Types are not the same on both sides of the assignment.", node->line_start);
+			//cout << "left: " << t1 << ", right: " << t2 << endl;
+			return SymbolType::INVALID;
+		}
+		return SymbolType::OK;
+
+	} else if (node_type == Statement) {
+		AST* stat_type_node = get_type(children, StatType);
+		string stat_type = stat_type_node->value;
+
+		if (stat_type == "while" || stat_type == "if") {
+			AST* condition_node = get_type(children, Condition);
+			resolve_type(condition_node, function_entry, class_table, global_table);
+
+			vector<AST*> stat_blocks = get_types(children, StatBlock);
+
+			SymbolType* return_type = new SymbolType(SymbolType::OK);
+
+			for (AST* stat_block : stat_blocks) {
+				SymbolType current_type = resolve_type(stat_block, function_entry, class_table, global_table);
+				if (*return_type != SymbolType::INVALID && current_type != SymbolType::OK) {
+					if (current_type != *return_type) {
+						if (*return_type != SymbolType::OK) {
+							add_error("Inconsistent return types in statement block.", node->line_start);
+							return SymbolType::INVALID;
+						}
+						return_type = new SymbolType(current_type);
+					}
+				}
+			}
+			
+			return *return_type;
+		}
+		else if (stat_type == "write" || stat_type == "read") {
+			SymbolType type = resolve_type(children[1], function_entry, class_table, global_table);
+			return stat_return(type);
+		}
+		else if (stat_type == "return") {
+			SymbolType return_type = resolve_type(children[1], function_entry, class_table, global_table);
+			if (return_type != *function_entry->type) {
+				stringstream ss;
+				ss << "Type mismatch. Returns " << return_type << ". Expected " << *function_entry->type << ".";
+				add_error(ss.str(), node->line_start);
+				return SymbolType::INVALID;
+			}
+			return return_type;
+		}
+	} else if (node_type == StatBlock) {
+		SymbolType* return_type = new SymbolType(SymbolType::OK);
+
+		for (AST* statement : node->children) {
+			SymbolType current_type = resolve_type(statement, function_entry, class_table, global_table);
+			if (*return_type != SymbolType::INVALID && current_type != SymbolType::OK) {
+				if (current_type != *return_type) {
+					if (*return_type != SymbolType::OK) {
+						//add_error("Inconsistent return types in statement block.", node->line_start);
+						return SymbolType::INVALID;
+					}
+					return_type = new SymbolType(current_type);
+				}
+			}
+		}
+
+		return *return_type;
+	}
+	// Forwarders
+	else if (node_type == Dim) {
+	return resolve_type(node->children[0], function_entry, class_table, global_table, dot_class_table);
+}
+	else if (node_type == FuncCallStat || node_type == Condition) {
+		SymbolType type = resolve_type(node->children[0], function_entry, class_table, global_table, dot_class_table);
+		return stat_return(type);
+	}
+	else if (node_type == Dot) {
+		AST* left_node = node->children[0];
+		AST* next_node = node->children[1];
+
+		if (function_table != class_table) {
+			AST* id = get_type(left_node->children, Id);
+			if (id->value == "self") return resolve_type(next_node, function_entry, class_table, global_table, class_table);
+		}
+
+		SymbolType start_type = resolve_type(left_node, function_entry, class_table, global_table);
+
+		if (start_type.dimensions.size()) {
+			stringstream ss;
+			ss << start_type;
+			add_error("An array does not have any members. Calling member on " + ss.str() + ".", line_start);
+			return SymbolType::INVALID;
+		}
+
+		SymbolTableEntry* class_entry = global_table->get_entry(start_type.type_id);
+
+		if (!class_entry) {
+			stringstream ss;
+			ss << start_type;
+			add_error("Cannot call member on \"" + ss.str() + "\" which is either not a class or an undeclared class.", line_start);
+			return SymbolType::INVALID;
+		}
+
+		SymbolTable* current_table = class_entry->link;
+
+		/*
+		while (next_node->type == Dot) {
+			left_node = next_node->children[0];
+
+			SymbolType left_type = resolve_type(left_node, current_table, current_table, global_table);
+
+			if (left_type.dimensions.size()) {
+				stringstream ss;
+				ss << left_type;
+				add_error("An array does not have any members. Calling member on " + ss.str() + ".", left_node->line_start);
+				return SymbolType::INVALID;
+			}
+
+			class_entry = global_table->get_entry(start_type.type_id);
+			current_table = class_entry->link;
+
+			next_node = next_node->children[1];
+		}
+		*/
+
+		return resolve_type(next_node, function_entry, class_table, global_table, current_table);
+	}
+
+	// forwarders
+	
+	return SymbolType::INVALID;
 }
 
 void SemanticAnalyzer::check_function_names(SymbolTable* global_table) {
@@ -52,15 +392,21 @@ void SemanticAnalyzer::check_function_names(SymbolTable* global_table) {
 	for (SymbolTable* table : tables_to_check) {
 		unordered_map<string, vector<string>> functions;
 
+		const string scope = (table->name == "global" ? "" : table->name + "::");
+
 		for (const auto& pair : table->entries) {
 			SymbolTableEntry* entry = pair.second;
+			string function_name = entry->name;
 			if (entry->kind == EntryKind::FuncDef) {
-				string function_name = entry->name;
+				
 				string function_id = entry->unique_id;
 				if (!functions.count(function_name)) functions.insert({ function_name, vector<string>() });
 
 				vector<string>& func_id_list = functions.at(function_name);
 				func_id_list.push_back(function_id);
+			}
+			else if (entry->kind == EntryKind::FuncDecl) {
+				add_error("Function " + scope + function_name +  " is declared but never defined", entry->line_location);
 			}
 		}
 
@@ -82,7 +428,7 @@ void SemanticAnalyzer::check_function_names(SymbolTable* global_table) {
 					add_error("Multiple main functions with different signatures: " + ss.str() + ".", -1);
 				}
 				else {
-					add_warning("Function " + (table->name == "global" ? "" : table->name + "::") + function_name + " overloaded: " + ss.str() + ".", -1);
+					add_warning("Function " + scope + function_name + " overloaded: " + ss.str() + ".", -1);
 				}
 			}
 		}
@@ -90,6 +436,24 @@ void SemanticAnalyzer::check_function_names(SymbolTable* global_table) {
 
 
 
+}
+
+int SemanticAnalyzer::migrate_line_locations(AST* node) {
+	if (node->token) {
+		node->line_start = node->token->line_location;
+		return node->line_start;
+	}
+	else {
+		int line = -1;
+		for (AST* child : node->children) {
+			int child_line = migrate_line_locations(child);
+			if (child_line != -1 && (line == -1 || child_line < line)) {
+				line = child_line;	
+			}
+		}
+		node->line_start = line;
+		return line;
+	}
 }
 
 bool SemanticAnalyzer::analyze() {
@@ -103,6 +467,7 @@ bool SemanticAnalyzer::analyze() {
 	std::ofstream file("output/outsemantic/" + filename + ".outsymboltables");
 	file << *global_table;
 
+	migrate_line_locations(root);
 	perform_semantic_checks(root, global_table);
 
 	print_errors();
@@ -128,7 +493,6 @@ void SemanticAnalyzer::print_errors() {
 	}
 }
 
-
 vector<AST*> SemanticAnalyzer::get_types(const vector <AST*>& list, std::string type) {
 	vector<AST*> type_list;
 	for (AST* el : list) if (el->get_type() == type) type_list.push_back(el);
@@ -141,7 +505,6 @@ AST* SemanticAnalyzer::get_type(const vector <AST*>& list, std::string type) {
 }
 
 SymbolTableClassEntry* SemanticAnalyzer::generate_class_entry(AST* class_node) {
-
 	const vector<AST*>& children = class_node->children;
 
 	const AST* id = get_type(children, Id);
@@ -215,13 +578,18 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 
 	const int line_location = id_token.line_location;
 
-	const string name = id->value;
+	string name = parent_class;
 
 	SymbolTable* func_table = new SymbolTable(name);
 
 	const AST* type_node = get_type(children, Type);
 
-	const string type_id = type_node ? type_node->value : parent_class;
+	string type_id = parent_class;
+
+	if (type_node && type_node->is_leaf) {
+		type_id = type_node->value;
+		name = id->value;
+	}
 
 	const AST* param_list = get_type(children, ParamList);
 
@@ -258,7 +626,6 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 	}
 
 	string unique_id = name + type->signature;
-
 	
 	const AST* visibility_node = get_type(children, Visibility);
 
@@ -282,10 +649,7 @@ STE::Visibility SemanticAnalyzer::get_visibility(const AST* visibility_node) {
 	return visibility;
 }
 
-SymbolTableEntry* SemanticAnalyzer::generate_variable_entry(AST* var_node, EntryKind kind) {
-	if (kind == EntryKind::Localvar) {
-		cout << "ayo";
-	}
+SymbolTableEntry* SemanticAnalyzer::generate_variable_entry(AST* var_node, STE::Kind kind) {
 	const vector<AST*>& children = var_node->children;
 
 	const AST* id = get_type(children, Id);
@@ -350,6 +714,7 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 		}
 		else {
 			class_entries.push_back(entry);
+			class_decl->decorator.class_entry = entry;
 		}
 	}
 
@@ -384,6 +749,8 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 						delete current_entry->link;
 
 						current_entry->link = entry->link;
+						func_def->decorator.function_entry = current_entry;
+						func_def->decorator.class_entry = class_entry;
 					}
 					else {
 						add_error("The function " + entry->unique_id + " is already defined in class " + class_name + ".", entry->line_location);
@@ -406,6 +773,9 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* node) {
 			if (entry != duplicate_entry) {
 				add_error("There already exists a function " + entry->unique_id + " at line " + to_string(duplicate_entry->line_location) + ".", entry->line_location);
 			}
+			else {
+				func_def->decorator.function_entry = entry;
+			}
 		}
 	}
 
@@ -425,7 +795,7 @@ void SemanticAnalyzer::pull_members(SymbolTableClassEntry* class_entry, SymbolTa
 
 	for (const auto& entry_pair : parent_entry->link->entries) {
 		SymbolTableEntry* parent_member = entry_pair.second;
-		if (parent_member->kind == EntryKind::Data || parent_member->kind == EntryKind::FuncDef || parent_member->kind == EntryKind::FuncDef) {
+		if (parent_member->kind == EntryKind::Data || parent_member->kind == EntryKind::FuncDef) {
 			string member_unique_id = parent_member->unique_id;
 			SymbolTableEntry* main_dup_entry = child_table->get_entry(member_unique_id);
 			if (main_dup_entry) {
