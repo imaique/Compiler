@@ -26,8 +26,23 @@ const std::unordered_map<STE::Visibility, std::string> SymbolTableEntry::visibil
 
 // SymbolType
 
+const SymbolType SymbolType::INVALID = SymbolType("#", vector<int>());
+
+const SymbolType SymbolType::INTEGER = SymbolType("integer", vector<int>());
+
+const SymbolType SymbolType::FLOAT = SymbolType("float", vector<int>());
+
+const SymbolType SymbolType::OK = SymbolType("^", vector<int>());
+
+const SymbolType SymbolType::VOID = SymbolType("void", vector<int>());
+
+
 std::ostream& operator<<(std::ostream& os, const SymbolType& type) {
-	os << type.type_id;
+	if (type == SymbolType::INVALID) {
+		os << "INVALID TYPE";
+	}
+	else if (type == SymbolType::OK) os << "OK";
+	else os << type.type_id;
 	for (int dimension : type.dimensions) {
 		os << "[" << (dimension >= 0 ? std::to_string(dimension) : "") << "]";
 	}
@@ -61,6 +76,17 @@ std::ostream& operator<<(std::ostream& os, const FunctionSymbolType& type) {
 SymbolType::SymbolType(std::string type_id, std::vector<int> dimensions) : type_id(type_id), dimensions(dimensions) {
 
 }
+
+bool SymbolType::operator==(const SymbolType& other) const
+{
+	return type_id == other.type_id && dimensions.size() == other.dimensions.size();
+}
+
+bool SymbolType::operator!=(const SymbolType& other) const
+{
+	return !(*this == other);
+}
+
 
 SymbolTable::SymbolTable(std::string name) : name(name) {
 

@@ -6,11 +6,21 @@
 class SymbolTable;
 
 class SymbolType {
+	
 
 public:
+	static const SymbolType INVALID;
+	static const SymbolType OK;
+	static const SymbolType INTEGER;
+	static const SymbolType FLOAT;
+	static const SymbolType VOID;
+
 	const std::string type_id;
 	const std::vector<int> dimensions;
 	SymbolType(std::string type_id, std::vector<int> dimensions);
+
+	bool operator==(const SymbolType& other) const;
+	bool operator!=(const SymbolType& other) const;
 
 	friend std::ostream& operator<<(std::ostream& os, const SymbolType& type);
 
@@ -18,8 +28,9 @@ public:
 };
 
 class FunctionSymbolType : public SymbolType {
-	std::string get_signature(std::vector<SymbolType> param_types);
+	
 public:
+	static std::string get_signature(std::vector<SymbolType> param_types);
 	std::vector<SymbolType> param_types;
 	const std::string signature;
 
