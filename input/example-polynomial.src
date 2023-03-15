@@ -21,7 +21,7 @@ class QUADRATIC isa POLYNOMIAL {
 // ====== member function implementations ====== //  
 function POLYNOMIAL::evaluate(x: float) => float
 {
-  return (0);
+  return (1.1);
 }
 
 function QUADRATIC::evaluate(x: float) => float
@@ -58,19 +58,22 @@ function LINEAR::evaluate(x: float) => float
 // ====== main ====== //
 function main() => void
 {
-  localvar f1: LINEAR(2, 3.5);
+  localvar f1: LINEAR(2.2, 3.5);
   localvar f2: QUADRATIC(-2.0, 1.0, 0.0);
   localvar counter: integer;
+  localvar flo: float;
+
 
   counter = 1; 	
+  flo = 2.2;
 
   while(counter <= 10)
   {
     write(counter);
-    write(f1.evaluate(counter));
-    write(f2.evaluate(counter));
+    write(f1.evaluate(flo));
+    write(f2.evaluate(flo));
   };
-}
+} 
 /*
     classes
     --------------------------------------

@@ -14,7 +14,7 @@ function bubbleSort(arr: integer[], size: integer) => void
       if (arr[j] > arr[j+1]) 
         then {
           // swap temp and arr[i]
-          temp = arr[j];
+          temp = arr[j];  
           arr[j] = arr[j+1];
           arr[j+1] = temp;
         } else ;
@@ -48,9 +48,9 @@ function main() => void
   arr[4] = 22;
   arr[5] = 11;
   arr[6] = 90;
-  printarray(arr, 7); 
+  printArray(arr, 7); 
   bubbleSort(arr, 7);
-  printarray(arr, 7); 
+  printArray(arr, 7); 
 }
 
 /*
