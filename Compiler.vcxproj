@@ -114,6 +114,7 @@
     <ClCompile Include="Semantic\SemanticAnalyzer.cpp" />
     <ClCompile Include="Semantic\SymbolTable.cpp" />
     <ClCompile Include="SyntaxAnalyzer\Parser.cpp" />
+    <ClCompile Include="Utils\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LexicalAnalyzer\LexicalAnalyzer.h" />
@@ -125,6 +126,7 @@
     <ClInclude Include="Semantic\SemanticAnalyzer.h" />
     <ClInclude Include="Semantic\SymbolTable.h" />
     <ClInclude Include="SyntaxAnalyzer\Parser.h" />
+    <ClInclude Include="Utils\utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
