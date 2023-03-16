@@ -140,7 +140,7 @@ void SymbolTable::get_spaces(int index, vector<int>& widths) {
 		SymbolType* type = entry->type;
 		if (type) {
 			std::stringstream type_str;
-			type_str << type;
+			type_str << *type;
 			try_push(local_index, widths, type_str.str().size());
 		}
 		else {
