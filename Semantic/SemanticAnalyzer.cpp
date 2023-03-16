@@ -250,6 +250,11 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 		SymbolType t1 = resolve_type(children[0], function_entry, class_table, global_table);
 		SymbolType t2 = resolve_type(children[2], function_entry, class_table, global_table);
 
+		if (t1 != SymbolType::FLOAT && t1 != SymbolType::INTEGER) {
+			add_error("Cannot perform binary operations on types that aren't numbers.", node->line_start);
+			return SymbolType::INVALID;
+		}
+
 		if (!same_type(t1, t2)) {
 			add_error("Types are not the same on both sides of the operation.", node->line_start);
 			return SymbolType::INVALID;
@@ -260,9 +265,13 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 		SymbolType t1 = resolve_type(children[0], function_entry, class_table, global_table);
 		SymbolType t2 = resolve_type(children[1], function_entry, class_table, global_table);
 
+		if (t1.dimensions.size()) {
+			add_error("Cannot assign a value to an array.", node->line_start);
+			return SymbolType::INVALID;
+		}
+
 		if (!same_type(t1, t2)) {
 			add_error("Types are not the same on both sides of the assignment.", node->line_start);
-			//cout << "left: " << t1 << ", right: " << t2 << endl;
 			return SymbolType::INVALID;
 		}
 		return SymbolType::OK;
@@ -480,6 +489,8 @@ bool SemanticAnalyzer::analyze() {
 	std::ofstream file("output/outsemantic/" + filename + ".outsymboltables");
 	file << *global_table;
 
+	//(* global_table).print_table(file);
+
 	migrate_line_locations(root);
 	perform_semantic_checks(root, global_table);
 
@@ -593,7 +604,7 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 
 	string name = parent_class;
 
-	SymbolTable* func_table = new SymbolTable(name);
+	
 
 	const AST* type_node = get_type(children, Type);
 
@@ -603,6 +614,8 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 		type_id = type_node->value;
 		name = id->value;
 	}
+
+	SymbolTable* func_table = new SymbolTable(name);
 
 	const AST* param_list = get_type(children, ParamList);
 
