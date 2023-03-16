@@ -163,7 +163,7 @@ void SymbolTable::get_spaces(int index, vector<int>& widths) {
 void SymbolTable::print_table(std::ostream& os) {
 	vector<int> widths;
 	get_spaces(0, widths);
-	widths.pop_back();
+	while(widths.back() == 0) widths.pop_back();
 	print_table(os, 0, widths);
 }
 

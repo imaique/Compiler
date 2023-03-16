@@ -1,3 +1,12 @@
-function f5() => id
+function main(x: float) => void
 {
-}
+  localvar x: integer;
+  localvar y: integer[];
+  localvar z: integer[];
+
+  x = 1;
+  x = 2.2;
+  x[0] = 3;
+  y = z;
+  y[y + z] = x;
+} 
