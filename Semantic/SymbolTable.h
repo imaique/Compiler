@@ -80,10 +80,12 @@ public:
 class SymbolTable {
 	
 	
-	std::vector<std::vector<int>> get_spaces() const;
-	void print_table(std::ostream& os, std::string prefix) const;
-
+	void get_spaces(int index, std::vector<int>& widths);
+	
+	void print_table(std::ostream& os, int index, const std::vector<int>& widths);
+	std::vector<SymbolTableEntry*> get_sorted_entries();
 public:
+	void print_table(std::ostream& os);
 	std::unordered_map<std::string, SymbolTableEntry*> entries;
 	SymbolTableEntry* get_entry(std::string name) const;
 	SymbolTableEntry* add_entry_if_new(SymbolTableEntry* entry);
@@ -92,7 +94,7 @@ public:
 	const std::string name;
 	SymbolTable(std::string name);
 
-	friend std::ostream& operator<<(std::ostream& os, const SymbolTable& table);
+	friend std::ostream& operator<<(std::ostream& os, SymbolTable& table);
 };
 
 
