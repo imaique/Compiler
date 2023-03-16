@@ -2,6 +2,7 @@
 #include "ASTGenerator.h"
 #include <algorithm>
 #include <sstream>
+#include "../Utils/utils.h"
 
 
 using std::string;
@@ -337,7 +338,8 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 	}
 	// Forwarders
 	else if (node_type == Dim) {
-	return resolve_type(node->children[0], function_entry, class_table, global_table, dot_class_table);
+	if (children.size()) return resolve_type(node->children[0], function_entry, class_table, global_table, dot_class_table);
+	else return SymbolType::INTEGER;
 }
 	else if (node_type == FuncCallStat || node_type == Condition) {
 		SymbolType type = resolve_type(node->children[0], function_entry, class_table, global_table, dot_class_table);
@@ -481,6 +483,7 @@ int SemanticAnalyzer::migrate_line_locations(AST* node) {
 bool SemanticAnalyzer::analyze() {
 	ASTGenerator ast_generator(filename);
 	AST* root = ast_generator.get_AST();
+	dot_writer::write_ast(root, filename);
 
 	// Invalid syntax
 	if (!root) return false;
@@ -644,7 +647,7 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 			SymbolTableEntry* duplicate_entry = func_table->add_entry_if_new(entry);
 
 			if (entry != duplicate_entry) {
-				add_error("There already exists a variable or parameter of the name " + entry->name + " at line " + to_string(duplicate_entry->line_location) + ".", localvar->line_start);
+				add_error("There already exists a variable or parameter of the name " + entry->name + " at line " + to_string(duplicate_entry->line_location) + ".", entry->line_location);
 			}
 		}
 	}
