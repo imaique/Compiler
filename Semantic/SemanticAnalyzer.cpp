@@ -489,8 +489,6 @@ bool SemanticAnalyzer::analyze() {
 	std::ofstream file("output/outsemantic/" + filename + ".outsymboltables");
 	file << *global_table;
 
-	//(* global_table).print_table(file);
-
 	migrate_line_locations(root);
 	perform_semantic_checks(root, global_table);
 
