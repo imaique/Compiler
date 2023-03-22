@@ -545,6 +545,9 @@ bool Parser::parse() {
 			}
 		}
 	}
+    
+    derivation_file.close();
+    error_file.close();
 
 	if (current_token.token_type != T::EndOfFile || error) {
 		return false;
@@ -552,8 +555,6 @@ bool Parser::parse() {
 	else {
 		return true;
 	}
-	derivation_file.close();
-	error_file.close();
 }
 
 Token Parser::get_next_token() {

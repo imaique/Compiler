@@ -80,8 +80,6 @@ public:
 	static Type get_reserved_type(std::string lexeme);
 	static bool is_reserved_word(std::string lexeme);
 	
-	//const std::string string_type;
-	
 	static const bool is_token_type(std::string s);
 
 private:

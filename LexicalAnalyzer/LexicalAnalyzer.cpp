@@ -50,7 +50,6 @@ Token LexicalAnalyzer::get_next_token() {
 		if (response.consume) {
 			if(c == '\n') token_stream << "\\n";
 			else token_stream << c;
-			//token_stream << c;
 			if(!end_of_line) index++;
 		}
 		state = response.nextState;
