@@ -4,7 +4,7 @@
 class Decorator {
 	SymbolType* type;
 public:
-	Decorator::Decorator();
+    Decorator();
 	bool type_resolved;
 	SymbolTableEntry* class_entry;
 	SymbolTableEntry* function_entry;

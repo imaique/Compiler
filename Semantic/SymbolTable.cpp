@@ -2,6 +2,7 @@
 #include <sstream>
 #include <iostream>
 #include <algorithm>
+#include <vector>
 
 using std::string;
 typedef SymbolTableEntry STE;

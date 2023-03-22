@@ -2,6 +2,7 @@
 #include <string>
 #include <unordered_map>
 #include <fstream>
+#include <vector>
 
 class SymbolTable;
 

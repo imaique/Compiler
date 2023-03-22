@@ -38,7 +38,7 @@ private:
 	SymbolType resolve_type(AST* node, const SymbolTableEntry* function_entry, const SymbolTable* class_table, const SymbolTable* global_table);
 	SymbolType resolve_type(AST* node, const SymbolTableEntry* function_entry, const SymbolTable* class_table, const SymbolTable* global_table, const SymbolTable* dot_class_table);
 
-	SymbolTableEntry::Visibility SemanticAnalyzer::get_visibility(const AST* visibility_node);
+	SymbolTableEntry::Visibility get_visibility(const AST* visibility_node);
 	std::vector<AST*>  get_types(const std::vector <AST*>& list, std::string type);
 	AST* get_type(const std::vector <AST*>& list, std::string type);
 

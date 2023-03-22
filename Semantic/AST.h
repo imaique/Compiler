@@ -1,6 +1,7 @@
 #pragma once
 #include "../LexicalAnalyzer/Token.h"
 #include "Decorator.h"
+#include <vector>
 
 class AST {
 public:
