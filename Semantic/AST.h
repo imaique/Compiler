@@ -20,3 +20,14 @@ public:
 	int line_start;
 };
 
+class IdNode : public AST {
+	std::string id;
+};
+
+class TypeNode : public AST {
+	std::string type;
+};
+
+class IdNode : public AST {
+	std::string id;
+};
