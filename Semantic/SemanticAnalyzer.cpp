@@ -374,30 +374,8 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 
 		SymbolTable* current_table = class_entry->link;
 
-		/*
-		while (next_node->type == Dot) {
-			left_node = next_node->children[0];
-
-			SymbolType left_type = resolve_type(left_node, current_table, current_table, global_table);
-
-			if (left_type.dimensions.size()) {
-				stringstream ss;
-				ss << left_type;
-				add_error("An array does not have any members. Calling member on " + ss.str() + ".", left_node->line_start);
-				return SymbolType::INVALID;
-			}
-
-			class_entry = global_table->get_entry(start_type.type_id);
-			current_table = class_entry->link;
-
-			next_node = next_node->children[1];
-		}
-		*/
-
 		return resolve_type(next_node, function_entry, class_table, global_table, current_table);
 	}
-
-	// forwarders
 	
 	return SymbolType::INVALID;
 }
@@ -457,8 +435,6 @@ void SemanticAnalyzer::check_function_names(SymbolTable* global_table) {
 			}
 		}
 	}
-
-
 
 }
 
