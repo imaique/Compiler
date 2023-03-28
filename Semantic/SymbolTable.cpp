@@ -18,6 +18,7 @@ const std::unordered_map<STE::Kind, std::string> SymbolTableEntry::kind_strings{
 		{Kind::Inherit, "inherit"},
 		{Kind::Data, "data"},
 		{Kind::Localvar, "local"},
+		{Kind::TempVar, "tempvar"},
 };
 
 const std::unordered_map<STE::Visibility, std::string> SymbolTableEntry::visibility_strings{
@@ -93,6 +94,7 @@ bool SymbolType::operator!=(const SymbolType& other) const
 SymbolTable::SymbolTable(std::string name) : name(name) {
 
 }
+
 
 void SymbolTable::add_entry(SymbolTableEntry* entry) {
 	entries.insert({entry->unique_id, entry});
@@ -265,10 +267,10 @@ SymbolTableEntry::SymbolTableEntry(std::string name, Kind kind, std::string type
 }
 */
 
-SymbolTableEntry::SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link) :
-	unique_id(unique_id), name(name), kind(kind), type(type), link(link), line_location(line_location), nextEntry(nullptr), visibility(visibility)
+SymbolTableEntry::SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node) :
+	unique_id(unique_id), name(name), kind(kind), type(type), link(link), line_location(line_location), nextEntry(nullptr), visibility(visibility), node(node)
 {
-
+	//node->entry = this;
 }
 
 SymbolTableEntry* SymbolTable::get_entry(std::string unique_id) const {
@@ -289,7 +291,9 @@ SymbolTableEntry* SymbolTable::add_entry_if_new(SymbolTableEntry* entry) {
 	return entry;
 }
 
-SymbolTableClassEntry::SymbolTableClassEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link) :
-	SymbolTableEntry(unique_id, name, kind, type, line_location, visibility, link) {
+// negative scope size
+int SymbolTableEntry::get_scope_size() const { return -1 * scope_size; }
 
+SymbolTableClassEntry::SymbolTableClassEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node) :
+	SymbolTableEntry(unique_id, name, kind, type, line_location, visibility, link, node) {
 }

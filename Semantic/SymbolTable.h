@@ -7,8 +7,6 @@
 class SymbolTable;
 
 class SymbolType {
-	
-
 public:
 	static const SymbolType INVALID;
 	static const SymbolType OK;
@@ -53,8 +51,12 @@ public:
 		Parameter,
 		Data,
 		Localvar,
-		Inherit
+		Inherit,
+		TempVar
 	};
+	int get_scope_size() const;
+	int scope_size = -1;
+	int offset = -1;
 	static const std::unordered_map<Kind, std::string> kind_strings;
 	enum class Visibility {
 		None,
@@ -71,9 +73,10 @@ public:
 	SymbolTable* link;
 	// In case of name collision
 	SymbolTableEntry* nextEntry;
+	AST* node;
 
 	//SymbolTableEntry(std::string name, Kind kind, std::string type);
-	SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link);
+	SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node);
 
 	
 };
@@ -91,7 +94,7 @@ public:
 	SymbolTableEntry* get_entry(std::string name) const;
 	SymbolTableEntry* add_entry_if_new(SymbolTableEntry* entry);
 	void add_entry(SymbolTableEntry* entry);
-
+	int scope_size = -1;
 	const std::string name;
 	SymbolTable(std::string name);
 
@@ -105,5 +108,5 @@ public:
 class SymbolTableClassEntry : public SymbolTableEntry {
 public:
 	std::unordered_map <std::string, SymbolTableEntry*> inherited_members;
-	SymbolTableClassEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link);
+	SymbolTableClassEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node);
 };
