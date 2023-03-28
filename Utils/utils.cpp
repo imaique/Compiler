@@ -1,10 +1,12 @@
 #include <iostream>
 #include <string>
 #include "utils.h"
+using std::string;
+using std::endl;
+using std::vector;
 
 namespace dot_writer {
-	using std::string;
-	using std::endl;
+
 
     void traverse_ast(AST* node, int& unique, std::ofstream& dot_file) {
         int node_id = unique++;
@@ -46,5 +48,17 @@ namespace dot_writer {
         }
 
         dot_file << "}";
+    }
+}
+namespace ast {
+    vector<AST*> get_types(const vector <AST*>& list, std::string type) {
+        vector<AST*> type_list;
+        for (AST* el : list) if (el->get_type() == type) type_list.push_back(el);
+        return type_list;
+    }
+
+    AST* get_type(const vector <AST*>& list, std::string type) {
+        for (AST* el : list) if (el->get_type() == type) return el;
+        return nullptr;
     }
 }
