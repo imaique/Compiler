@@ -1,6 +1,6 @@
 #include "Decorator.h"
 
-Decorator::Decorator() : type_resolved(false), class_entry(nullptr), function_entry(nullptr) {
+Decorator::Decorator() : type_resolved(false), class_entry(nullptr), function_entry(nullptr), type(nullptr) {
 
 }
 
