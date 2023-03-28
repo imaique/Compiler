@@ -4,7 +4,7 @@
 
 class Token {
 public:
-	static enum class Type {
+	enum class Type {
 		IntegerNumber,
 		ID,
 		FloatNumber,
