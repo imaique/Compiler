@@ -16,6 +16,7 @@ using std::unordered_map;
 using std::stringstream;
 typedef SymbolTableEntry::Kind EntryKind;
 
+using namespace ast;
 using namespace ASTConstants;
 
 SymbolType stat_return(SymbolType type) {
@@ -260,6 +261,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			add_error("Types are not the same on both sides of the operation.", node->line_start);
 			return SymbolType::INVALID;
 		}
+		node->decorator.set_type(t1);
 		return t1;
 	}
 	else if (node_type == AssignStat) {
@@ -518,17 +520,6 @@ void SemanticAnalyzer::print_errors() {
 	}
 }
 
-vector<AST*> SemanticAnalyzer::get_types(const vector <AST*>& list, std::string type) {
-	vector<AST*> type_list;
-	for (AST* el : list) if (el->get_type() == type) type_list.push_back(el);
-	return type_list;
-}
-
-AST* SemanticAnalyzer::get_type(const vector <AST*>& list, std::string type) {
-	for (AST* el : list) if (el->get_type() == type) return el;
-	return nullptr;
-}
-
 SymbolTableClassEntry* SemanticAnalyzer::generate_class_entry(AST* class_node) {
 	const vector<AST*>& children = class_node->children;
 
@@ -583,13 +574,13 @@ SymbolTableClassEntry* SemanticAnalyzer::generate_class_entry(AST* class_node) {
 	}
 
 
-	return new SymbolTableClassEntry(name, name, STE::Kind::Class, nullptr, line_location, STE::Visibility::None, class_table);
+	return new SymbolTableClassEntry(name, name, STE::Kind::Class, nullptr, line_location, STE::Visibility::None, class_table, class_node);
 }
 
 SymbolTableEntry* SemanticAnalyzer::generate_inherit_entry(AST* id_node) {
 	const string name = id_node->value;
 	const int line_location = id_node->token->line_location;
-	return new SymbolTableEntry(name + ' ', name, EntryKind::Inherit, nullptr, line_location, STE::Visibility::None, nullptr);
+	return new SymbolTableEntry(name + ' ', name, EntryKind::Inherit, nullptr, line_location, STE::Visibility::None, nullptr, id_node);
 }
 
 SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE::Kind func_kind, string parent_class) {
@@ -658,7 +649,7 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 
 	STE::Visibility visibility = get_visibility(visibility_node);
 
-	return new SymbolTableEntry(unique_id, name, func_kind, type, line_location, visibility, func_table);
+	return new SymbolTableEntry(unique_id, name, func_kind, type, line_location, visibility, func_table, func_node);
 }
 
 STE::Visibility SemanticAnalyzer::get_visibility(const AST* visibility_node) {
@@ -702,7 +693,7 @@ SymbolTableEntry* SemanticAnalyzer::generate_variable_entry(AST* var_node, STE::
 
 	STE::Visibility visibility = get_visibility(visibility_node);
 
-	return new SymbolTableEntry(name, name, kind, type, line_location, visibility, nullptr);
+	return new SymbolTableEntry(name, name, kind, type, line_location, visibility, nullptr, var_node);
 }
 
 vector<int> SemanticAnalyzer::get_dimensions(const std::vector <AST*> dimension_nodes) {
