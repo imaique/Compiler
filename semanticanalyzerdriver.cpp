@@ -17,5 +17,4 @@ int main() {
             std::cout << source_file << " doesn't exist. Please make sure the file is in the input folder. Skipping file." << std::endl;
         }
     }
-    std::cin.get();
 }
