@@ -1,12 +1,16 @@
-function main(x: float) => void
+function main() => void
 {
-  localvar x: integer;
-  localvar y: integer[];
-  localvar z: integer[];
-
-  x = 1;
-  x = 2.2;
-  x[0] = 3;
-  y = z;
-  y[y + z] = x;
+  write(1 + 1);
 } 
+/*
+  entry
+  % 1 + 1
+  addi r1, r0, 1
+  addi r2, r0, 1
+  add r3, r2, r1
+
+  % write(1 + 1)
+
+
+  res buf 20
+*/
