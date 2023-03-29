@@ -1,2 +1,0 @@
-Warning: Member evaluate(float) in QUADRATIC is overriding the one defined in POLYNOMIAL. (line 27)
-Warning: Member evaluate(float) in LINEAR is overriding the one defined in POLYNOMIAL. (line 50)
