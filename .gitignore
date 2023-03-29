@@ -1,6 +1,7 @@
 *.outlextokens
 *.outlexerrors
 *.outderivation
+*.outsemanticerrors
 **/.DS_Store
 test_driver.cpp
 

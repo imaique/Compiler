@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <sstream>
 #include "../Utils/utils.h"
+#include "SymbolTable.h"
+#include "../CodeGeneration/CodeGenerator.h"
 
 
 using std::string;
@@ -243,7 +245,9 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 
 	}
 	else if (node_type == IntNum || node_type == FloatNum) {
-		return node_type == IntNum ? SymbolType::INTEGER : SymbolType::FLOAT;
+		SymbolType type = node_type == IntNum ? SymbolType::INTEGER : SymbolType::FLOAT;
+		node->decorator.set_type(type);
+		return type;
 	}
 	else if (node_type == Factor) {
 		return resolve_type(children[1], function_entry, class_table, global_table);
@@ -498,6 +502,11 @@ bool SemanticAnalyzer::analyze() {
 	perform_semantic_checks(root, global_table);
 
 	print_errors();
+
+	if (!errors.size()) {
+		CodeGenerator code_generator(filename, root, global_table);
+		code_generator.generate();
+	}
 	return true;
 }
 

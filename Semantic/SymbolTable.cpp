@@ -3,6 +3,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include "AST.h"
 
 using std::string;
 typedef SymbolTableEntry STE;
@@ -126,6 +127,10 @@ void try_push(int& index, vector<int>& widths, int width) {
 	if (widths.size() == index) widths.push_back(width);
 	else widths[index] = std::max(widths[index], width);
 	index++;
+}
+
+string SymbolTable::get_scope_size() {
+	return std::to_string(scope_size);
 }
 
 void SymbolTable::get_spaces(int index, vector<int>& widths) {
@@ -268,9 +273,15 @@ SymbolTableEntry::SymbolTableEntry(std::string name, Kind kind, std::string type
 */
 
 SymbolTableEntry::SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node) :
-	unique_id(unique_id), name(name), kind(kind), type(type), link(link), line_location(line_location), nextEntry(nullptr), visibility(visibility), node(node)
+	unique_id(unique_id), name(name), kind(kind), type(type), link(link), line_location(line_location), visibility(visibility), node(node)
 {
-	//node->entry = this;
+	node->entry = this;
+}
+
+SymbolTableEntry::SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node, int offset) :
+	unique_id(unique_id), name(name), kind(kind), type(type), link(link), line_location(line_location), visibility(visibility), node(node), offset(offset)
+{
+	node->entry = this;
 }
 
 SymbolTableEntry* SymbolTable::get_entry(std::string unique_id) const {
@@ -291,8 +302,6 @@ SymbolTableEntry* SymbolTable::add_entry_if_new(SymbolTableEntry* entry) {
 	return entry;
 }
 
-// negative scope size
-int SymbolTableEntry::get_scope_size() const { return -1 * scope_size; }
 
 SymbolTableClassEntry::SymbolTableClassEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node) :
 	SymbolTableEntry(unique_id, name, kind, type, line_location, visibility, link, node) {

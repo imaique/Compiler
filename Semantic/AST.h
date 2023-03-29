@@ -18,5 +18,6 @@ public:
 	std::vector<AST*> children;
 	Decorator decorator;
 	int line_start;
+	SymbolTableEntry* entry;
 };
 

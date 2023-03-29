@@ -5,6 +5,7 @@
 #include <vector>
 
 class SymbolTable;
+class AST;
 
 class SymbolType {
 public:
@@ -52,11 +53,13 @@ public:
 		Data,
 		Localvar,
 		Inherit,
-		TempVar
+		TempVar,
+		Jump,
+		Return,
 	};
 	int get_scope_size() const;
-	int scope_size = -1;
-	int offset = -1;
+	int m_size = 1;
+	int offset = 666;
 	static const std::unordered_map<Kind, std::string> kind_strings;
 	enum class Visibility {
 		None,
@@ -71,12 +74,11 @@ public:
 	Visibility visibility;
 	int line_location;
 	SymbolTable* link;
-	// In case of name collision
-	SymbolTableEntry* nextEntry;
 	AST* node;
 
 	//SymbolTableEntry(std::string name, Kind kind, std::string type);
 	SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node);
+	SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node, int offset);
 
 	
 };
@@ -94,10 +96,10 @@ public:
 	SymbolTableEntry* get_entry(std::string name) const;
 	SymbolTableEntry* add_entry_if_new(SymbolTableEntry* entry);
 	void add_entry(SymbolTableEntry* entry);
-	int scope_size = -1;
+	int scope_size = 1;
 	const std::string name;
 	SymbolTable(std::string name);
-
+	std::string get_scope_size();
 	friend std::ostream& operator<<(std::ostream& os, SymbolTable& table);
 };
 
