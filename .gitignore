@@ -2,6 +2,11 @@
 *.outlexerrors
 *.outderivation
 *.outsemanticerrors
+*.moon
+*.m
+*.moon
+*.grm
+*.outast
 **/.DS_Store
 test_driver.cpp
 
