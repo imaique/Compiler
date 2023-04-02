@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include "../Utils/utils.h"
 
 
 using std::string;
@@ -10,6 +11,7 @@ using std::getline;
 using std::stringstream;
 using std::vector;
 using std::unordered_map;
+
 
 
 
@@ -130,6 +132,7 @@ bool ASTGenerator::perform_semantic_action(std::string action, const Token& toke
 
 		new_node = new AST(type, children);
 		m_stack.push(new_node);
+		dot_writer::write_ast(new_node, "test");
 	}
 
 	

@@ -34,6 +34,9 @@ public:
 	std::string get_op_instruction(std::string op_instruop_typection);
 	int get_size(SymbolType type);
 	void load_word(SymbolTableEntry* entry, std::string destination_register);
+
+	void copy_values(SymbolTableEntry* destination_entry, std::string origin_register, SymbolTableEntry* origin_reference_entry);
+
 	void load_value(SymbolTableEntry* entry, std::string destination_register);
 	void store_into_reference(SymbolTableEntry* entry, std::string destination_register);
 

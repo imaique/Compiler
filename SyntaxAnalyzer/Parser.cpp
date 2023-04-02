@@ -322,12 +322,12 @@ unordered_map<string, unordered_map<string, string>> Parser::initialize_parsing_
 	cs r123 = "float";
 	cs r124 = "integer";
 	cs r125 = "id";
-	cs r126 = "ID VARIABLE2";
-	cs r127 = "REPTIDNEST1 _DimList REPTVARIABLE";
+	cs r126 = "ID VARIABLE2 _DotList";
+	cs r127 = "REPTIDNEST1 _DimList _Variable REPTVARIABLE";
 	cs r128 = "APARAMSLISTIDNEST";
 	cs r129 = "dot ID VARIDNEST2";
 	cs r130 = "lpar _stop APARAMS _AParamList rpar";
-	cs r131 = "APARAMSLIST VARIDNEST";
+	cs r131 = "APARAMSLIST _FuncCall VARIDNEST";
 	cs r132 = "REPTIDNEST1";
 	cs r133 = "APARAMSLISTIDNEST";
 	cs r134 = "private";

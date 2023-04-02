@@ -1,3 +1,41 @@
+function main() => void
+{
+  localvar a: integer;
+  if(not not 1 < 2) then {} else {};
+}
+
+
+/*
+
+function main() => void
+{
+  localvar i: integer;
+  i = 3;
+  while(i > 0) {
+    write(i);
+    i = i - 1;
+  };
+}
+===
+function main() => void
+{
+  write(get().b);
+}
+
+function get() => POLYNOMIAL
+{
+  localvar x: POLYNOMIAL;
+  x.b = 222;
+  return(x);
+}
+
+class POLYNOMIAL {
+  private attribute a: integer;
+  private attribute b: integer;
+};
+
+
+===
 
 function main() => void
 {
@@ -19,7 +57,8 @@ function POLYNOMIAL::evaluate(x: integer) => void
   if(x > 0) then self.evaluate(x - 1); else {};
 }
 
-/*
+===
+
 function main() => void
 {
   localvar a: POLYNOMIAL;

@@ -22,6 +22,7 @@ void CodeGenerator::generate() {
 void CodeGenerator::generate_code() {
 	generate_code(root, nullptr, nullptr, nullptr);
 
+	write_instruction("ent", "db \"Enter input: \", 0");
 	write_instruction("nl", "db 13, 10, 0");
 	write_instruction("buf", "res 20");
 }
@@ -60,7 +61,7 @@ void CodeGenerator::generate_temporary_function_variables(AST* node, int& scope_
 	for (AST* child_node : node->children) generate_temporary_function_variables(child_node, scope_size, temp_count, func_table);
 	string node_type = node->type;
 
-	if (node_type == Operation || node_type == Variable || node_type == IntNum || node_type == FloatNum || node_type == FuncCall) {
+	if (node_type == Operation || node_type == Variable || node_type == IntNum || node_type == FloatNum || node_type == FuncCall || node_type == Dot || node_type == Factor) {
 		int size = 4;
 		if(node_type == FuncCall) size = get_size(node->decorator.get_type());
 		string name = "t" + to_string(temp_count++);
@@ -171,13 +172,70 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 			free_register(r);
 		}
 		else if (stat_type == "while") {
+			AST* condition_node = get_type(children, Condition);
+			AST* stat_block = get_type(children, StatBlock);
 
+			string go_branch = get_branch();
+			string end_branch = get_branch();
+			write_comment("while loop");
+			write_instruction(go_branch, "");
+
+			SymbolTableEntry* condition_entry = generate_code(condition_node, function_scope, class_table, dot_entry);
+			string r = get_register();
+
+			load_value(condition_entry, r);
+			write_instruction("bz " + r + "," + end_branch);
+			generate_code(stat_block, function_scope, class_table, dot_entry);
+			jump(go_branch);
+			write_instruction(end_branch, "");
+		
+			free_register(r);
 		}
 		else if (stat_type == "read") {
+			const string r = get_register();
 
+			SymbolTableEntry* variable_entry = generate_code(children[1], function_scope, class_table, dot_entry);
+
+			write_comment("read statement");
+			write_instruction("addi r14,r14," + stack_frame_size);
+
+			integer_add(r, "r0", "ent");
+			store_word("-8", r);
+			jump_and_link("r15", "putstr");
+
+			integer_add(r, "r0", "buf");
+			store_word("-8", r);
+			jump_and_link("r15", "getstr");
+			jump_and_link("r15", "strint");
+
+			write_instruction("subi r14,r14," + stack_frame_size);
+
+			load_word(variable_entry, r);
+			write_instruction("sw 0(" + r + "),r13");
+
+			free_register(r);
 		}
 		else if (stat_type == "return") {
+			SymbolTableEntry* return_value_entry = generate_code(children[1], function_scope, class_table, dot_entry);
+			SymbolTableEntry* return_entry = function_table->get_entry("_return");
+			string r = get_register();
 
+			write_empty_line();
+			write_comment("store return value into return register");
+			if (return_value_entry->is_reference) {
+				load_word(return_value_entry, r);
+				store_word(return_entry->get_offset(), r);
+			}
+			else {
+				integer_add(r, "r0", return_value_entry->get_offset());
+				register_add(r, r, "r14");
+				store_word(return_entry->get_offset(), r);
+			}
+
+
+			//return_entry->is_reference = return_value_entry->is_reference;
+
+			free_register(r);
 		}
 	}
 	else if (node_type == Condition) {
@@ -348,20 +406,38 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 		}
 
 		free_register(argument_reg);
+
+		const string return_register = get_register();
 		
 		integer_add("r14", "r14", stack_frame_size);
 		write_instruction("jl r15," + short_name);
-		write_instruction("subi r14,r14," + stack_frame_size);
-		 
-		// return
-	}
 
+		SymbolTableEntry* return_entry = jumping_function_table->get_entry("_return");
+		load_word(return_entry, return_register);
+
+		write_instruction("subi r14,r14," + stack_frame_size);
+
+		copy_values(node_entry, return_register, return_entry);
+
+		free_register(return_register);
+
+		return node_entry;
+	}
+	
 	else if (node_type == Dot) {
 		AST* left = children[0];
 		AST* right = children[1];
 
 		SymbolTableEntry* left_entry = generate_code(left, function_scope, class_table, dot_entry);
-		SymbolTableEntry* right_entry = generate_code(right, function_scope, class_table, left_entry);
+		SymbolTableEntry* dot_entry = left_entry;
+		if (!dot_entry->is_reference) {
+			const string r = get_register();
+			integer_add(r, "r0", left_entry->get_offset());
+			register_add(r, r, "r14");
+			store_word(node_entry->get_offset(), r);
+			dot_entry = node_entry;
+		}
+		SymbolTableEntry* right_entry = generate_code(right, function_scope, class_table, dot_entry);
 		return right_entry;
 	}
 	else if (node_type == Dim) {
@@ -387,6 +463,25 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 		write_empty_line();
 		free_register(r);
 
+	}
+	else if (node_type == Factor) {
+		string r = get_register();
+
+		SymbolTableEntry* number_entry = generate_code(children[1], function_scope, class_table, dot_entry);
+		load_value(number_entry, r);
+		AST* sign_node = get_type(children, Sign);
+		string sign = sign_node->value;
+		if (sign == "minus") {
+			write_instruction("sub " + r + ",r0," + r);
+		}
+		else if (sign == "not") {
+			write_instruction("not " + r + "," + r);
+		}
+
+		store_word(node_entry->get_offset(), r);
+		node_entry->is_reference = false;
+		free_register(r);
+		return node_entry;
 	}
 	else if (node_type == Operation) {
 		string r1 = get_register();
@@ -416,7 +511,6 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 		node->entry->is_reference = false;
 		return node_entry;
 	}
-	// TODO factor
 	else if (node_type == IntNum) {
 		write_instruction("");
 		string r = get_register();
@@ -541,6 +635,38 @@ void CodeGenerator::jump(std::string address) {
 	write_instruction("j " + address);
 }
 
+void CodeGenerator::copy_values(SymbolTableEntry* destination_entry, std::string origin_register, SymbolTableEntry* origin_reference_entry) {
+	/*
+	if (!origin_reference_entry->is_reference) {
+		store_word(destination_entry->get_offset(), origin_register);
+		return;
+	}
+	*/
+
+	int current_word = 0;
+
+	const int return_size = abs(get_size(*origin_reference_entry->type));
+
+	const string destination_register = get_register();
+	integer_add(destination_register, "r0", destination_entry->get_offset());
+	register_add(destination_register, destination_register, "r14");
+	//load_word(destination_entry, destination_register);
+
+	const string value_register = get_register();
+
+	while (return_size > current_word)
+	{
+		write_instruction("lw " + value_register + ",0(" + origin_register + ")");
+		write_instruction("sw 0(" + destination_register + ")," + value_register);
+		integer_add(destination_register, destination_register, "-4");
+		integer_add(origin_register, origin_register, "-4");
+		current_word += 4;
+	}
+
+	free_register(value_register);
+	free_register(destination_register);
+}
+
 void CodeGenerator::store_word(string destination_offset, std::string origin_register) {
 	write_instruction("sw " + destination_offset + +"(r14)," + origin_register);
 }
@@ -639,7 +765,6 @@ int CodeGenerator::get_memory(SymbolTableEntry* entry, SymbolType* class_type) {
 			scope_size -= 4;
 
 			SymbolType return_type = SymbolType(*entry->type);
-			// TODO: implement return logic
 			SymbolTableEntry* return_entry = new SymbolTableEntry("_return", "return", EntryKind::Jump, new SymbolType(return_type), -1, SymbolTableEntry::Visibility::None, nullptr, nullptr, scope_size);
 
 			scope_size -= 4;//get_size(return_type);
@@ -670,5 +795,5 @@ int CodeGenerator::get_memory(SymbolTableEntry* entry, SymbolType* class_type) {
 int CodeGenerator::get_size(SymbolType type) {
 	int type_size = get_memory(type.type_id);
 	for (int dim : type.dimensions) type_size *= dim;
-	return type_size;
+	return abs(type_size);
 }

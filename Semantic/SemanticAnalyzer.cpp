@@ -254,7 +254,9 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 		return type;
 	}
 	else if (node_type == Factor) {
-		return resolve_type(children[1], function_entry, class_table, global_table);
+		SymbolType type = resolve_type(children[1], function_entry, class_table, global_table);
+		node->decorator.set_type(type);
+		return type;
 	}
 	else if (node_type == Operation) {
 		SymbolType t1 = resolve_type(children[0], function_entry, class_table, global_table);
@@ -406,7 +408,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			next_node = next_node->children[1];
 		}
 		*/
-
+		node->decorator.set_type(start_type);
 		return resolve_type(next_node, function_entry, class_table, global_table, current_table);
 	}
 
