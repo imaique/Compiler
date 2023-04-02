@@ -155,8 +155,7 @@ void ASTGenerator::convert_dot_lists(AST* node) {
 			node->type = "Dot";
 		}
 		else {
-			std::reverse(children.begin(), children.end());
-			AST* new_node = create_dot(children);
+			AST* new_node = create_dot(children, 0);
 			*node = *(new_node);
 		}
 	}
@@ -165,15 +164,19 @@ void ASTGenerator::convert_dot_lists(AST* node) {
 		convert_dot_lists(child);
 }
 
-AST* ASTGenerator::create_dot(vector<AST*>& children) {
-	if (children.size() == 2) {
-		return new AST("Dot", children);
+AST* ASTGenerator::create_dot(vector<AST*>& children, int index) {
+	if (children.size() - index == 2) {
+		return new AST("Dot", { children[index], children[index + 1] });
 	}
 	else {
+		return new AST("Dot", { children[index], create_dot(children, index + 1) });
+		/*
 		AST* last_child = children.back();
 		children.pop_back();
 		AST* first_child = create_dot(children);
-		return new AST("Dot", {first_child, last_child});
+		return new AST("Dot", {last_child, first_child});
+		*/
 	}
 }
 
+FunctionSymbolTable::FunctionSymbolTable(std::string name) : SymbolTable(name) {}

@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <fstream>
 #include <vector>
+#include <optional>
 
 class SymbolTable;
 class AST;
@@ -17,6 +18,7 @@ public:
 
 	const std::string type_id;
 	const std::vector<int> dimensions;
+	bool is_basic_type() const;
 	SymbolType(std::string type_id, std::vector<int> dimensions);
 
 	bool operator==(const SymbolType& other) const;
@@ -57,7 +59,9 @@ public:
 		Jump,
 		Return,
 	};
-	int get_scope_size() const;
+
+	std::string get_offset();
+	//int get_scope_size() const;
 	int m_size = 1;
 	int offset = 666;
 	static const std::unordered_map<Kind, std::string> kind_strings;
@@ -75,8 +79,11 @@ public:
 	int line_location;
 	SymbolTable* link;
 	AST* node;
+	bool is_reference = false;
+	std::optional<std::string> scope = {};
 
 	//SymbolTableEntry(std::string name, Kind kind, std::string type);
+	SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node, std::optional<std::string> scope);
 	SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node);
 	SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node, int offset);
 
@@ -95,7 +102,7 @@ public:
 	std::unordered_map<std::string, SymbolTableEntry*> entries;
 	SymbolTableEntry* get_entry(std::string name) const;
 	SymbolTableEntry* add_entry_if_new(SymbolTableEntry* entry);
-	void add_entry(SymbolTableEntry* entry);
+	virtual void add_entry(SymbolTableEntry* entry);
 	int scope_size = 1;
 	const std::string name;
 	SymbolTable(std::string name);
@@ -103,6 +110,12 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, SymbolTable& table);
 };
 
+class FunctionSymbolTable : public SymbolTable {
+public:
+	std::vector<SymbolTableEntry*> parameters;
+	void add_entry(SymbolTableEntry* entry);
+	FunctionSymbolTable(std::string name);
+};
 
 
 

@@ -20,6 +20,7 @@ const std::unordered_map<STE::Kind, std::string> SymbolTableEntry::kind_strings{
 		{Kind::Data, "data"},
 		{Kind::Localvar, "local"},
 		{Kind::TempVar, "tempvar"},
+		{Kind::Jump, "jump"},
 };
 
 const std::unordered_map<STE::Visibility, std::string> SymbolTableEntry::visibility_strings{
@@ -48,7 +49,7 @@ std::ostream& operator<<(std::ostream& os, const SymbolType& type) {
 	else if (type == SymbolType::OK) os << "OK";
 	else os << type.type_id;
 	for (int dimension : type.dimensions) {
-		os << "[" << (dimension >= 0 ? std::to_string(dimension) : "") << "]";
+		os << "[]";
 	}
 	return os;
 }
@@ -76,6 +77,10 @@ std::ostream& operator<<(std::ostream& os, const FunctionSymbolType& type) {
 }
 
 // SymbolTable
+
+bool SymbolType::is_basic_type() const {
+	return *this == SymbolType::INTEGER;
+}
 
 SymbolType::SymbolType(std::string type_id, std::vector<int> dimensions) : type_id(type_id), dimensions(dimensions) {
 
@@ -164,7 +169,9 @@ void SymbolTable::get_spaces(int index, vector<int>& widths) {
 			try_push(local_index, widths, 0);
 		}
 
-		if (entry->link) entry->link->get_spaces(index + 1, widths);
+		try_push(local_index, widths, entry->get_offset().size());
+
+		if (entry->link && (SymbolTableEntry::Kind::Class == entry->kind || SymbolTableEntry::Kind::FuncDef == entry->kind)) entry->link->get_spaces(index + 1, widths);
 	}
 }
 
@@ -234,17 +241,16 @@ void SymbolTable::print_table(std::ostream& os, int index, const std::vector<int
 			visibility_string = STE::visibility_strings.at(visibility);
 		}
 
-		vector<string> info{kind_string, entry->name, type_string, visibility_string };
+		vector<string> info{kind_string, entry->name, type_string, visibility_string, entry->get_offset()};
 		print_info(os, index, widths, info);
-
-		if (entry->link) entry->link->print_table(os, index + 1, widths);
+		if (entry->link && (SymbolTableEntry::Kind::Class == entry->kind || SymbolTableEntry::Kind::FuncDef == entry->kind)) entry->link->print_table(os, index + 1, widths);
 	}
 	print_info(os, index - 1, widths, vector<string>(), true);
 	if(index - 1) print_info(os, index, widths, vector<string>());
 }
 
 vector<SymbolTableEntry*> SymbolTable::get_sorted_entries() {
-	static constexpr auto comp = [](SymbolTableEntry* e1, SymbolTableEntry* e2) { return e1->line_location < e2->line_location; };
+	static constexpr auto comp = [](SymbolTableEntry* e1, SymbolTableEntry* e2) { return e1->offset > e2->offset; };
 	vector<SymbolTableEntry*> sorted_entries;
 	for (const auto& pair : entries) {
 		SymbolTableEntry* entry = pair.second;
@@ -275,13 +281,19 @@ SymbolTableEntry::SymbolTableEntry(std::string name, Kind kind, std::string type
 SymbolTableEntry::SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node) :
 	unique_id(unique_id), name(name), kind(kind), type(type), link(link), line_location(line_location), visibility(visibility), node(node)
 {
-	node->entry = this;
+	if(node) node->entry = this;
+}
+
+SymbolTableEntry::SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node, std::optional<std::string> scope) :
+	unique_id(unique_id), name(name), kind(kind), type(type), link(link), line_location(line_location), visibility(visibility), node(node), scope(scope)
+{
+	if (node) node->entry = this;
 }
 
 SymbolTableEntry::SymbolTableEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node, int offset) :
 	unique_id(unique_id), name(name), kind(kind), type(type), link(link), line_location(line_location), visibility(visibility), node(node), offset(offset)
 {
-	node->entry = this;
+	if(node) node->entry = this;
 }
 
 SymbolTableEntry* SymbolTable::get_entry(std::string unique_id) const {
@@ -302,7 +314,18 @@ SymbolTableEntry* SymbolTable::add_entry_if_new(SymbolTableEntry* entry) {
 	return entry;
 }
 
+std::string SymbolTableEntry::get_offset() {
+	return std::to_string(offset);
+}
+
 
 SymbolTableClassEntry::SymbolTableClassEntry(std::string unique_id, std::string name, Kind kind, SymbolType* type, int line_location, Visibility visibility, SymbolTable* link, AST* node) :
 	SymbolTableEntry(unique_id, name, kind, type, line_location, visibility, link, node) {
 }
+
+void FunctionSymbolTable::add_entry(SymbolTableEntry* entry) {
+	SymbolTable::add_entry(entry);
+	if (entry->kind == SymbolTableEntry::Kind::Parameter)
+		parameters.push_back(entry);
+}
+

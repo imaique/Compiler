@@ -116,15 +116,18 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 
 		const AST* param_list = get_type(children, AParamList);
 
+		vector<int> dimensions;
+
 		if (dim_list) {
-			vector<int> dimensions;
+			
 			for (AST* dim : dim_list->children) {
 				SymbolType dim_type = resolve_type(dim, function_entry, class_table, global_table);
 				if (dim_type != SymbolType::INTEGER) {
 					add_error("Indices must be of integer type.", node->line_start);
 					return SymbolType::INVALID;
 				}
-				dimensions.push_back(-1);
+				AST* int_node = get_type(dim->children, IntNum);
+				dimensions.push_back(int_node ? stoi(int_node->value) : -1);
 			}
 		}
 		else if (param_list) {
@@ -146,6 +149,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 				return SymbolType::INVALID;
 			}
 		}
+		node->decorator.set_type(SymbolType(type_name, dimensions));
 
 		return SymbolType::OK;
 	}
@@ -236,13 +240,13 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 		}
 
 		if (function_entry) {
+			node->decorator.set_type(*function_entry->type);
 			return *function_entry->type;
 		}
 		else {
 			add_error("Reference to undeclared or undefined function " + unique_id + ".", node->line_start);
 			return SymbolType::INVALID;
 		}
-
 	}
 	else if (node_type == IntNum || node_type == FloatNum) {
 		SymbolType type = node_type == IntNum ? SymbolType::INTEGER : SymbolType::FLOAT;
@@ -357,10 +361,13 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 
 		if (function_table != class_table) {
 			AST* id = get_type(left_node->children, Id);
-			if (id->value == "self") return resolve_type(next_node, function_entry, class_table, global_table, class_table);
+			if (id->value == "self") {
+				left_node->type = *function_entry->scope;
+				return resolve_type(next_node, function_entry, class_table, global_table, class_table);
+			}
 		}
 
-		SymbolType start_type = resolve_type(left_node, function_entry, class_table, global_table);
+		SymbolType start_type = resolve_type(left_node, function_entry, class_table, global_table, dot_class_table);
 
 		if (start_type.dimensions.size()) {
 			stringstream ss;
@@ -496,17 +503,20 @@ bool SemanticAnalyzer::analyze() {
 
 	SymbolTable* global_table = construct_symbol_tables(root);
 	std::ofstream file("output/outsemantic/" + filename + ".outsymboltables");
-	file << *global_table;
+	//file << *global_table;
 
 	migrate_line_locations(root);
 	perform_semantic_checks(root, global_table);
 
 	print_errors();
 
-	if (!errors.size()) {
-		CodeGenerator code_generator(filename, root, global_table);
-		code_generator.generate();
-	}
+	
+	CodeGenerator code_generator(filename, root, global_table);
+	if (!errors.size()) code_generator.generate();
+	else code_generator.write_comment("semantic errors");
+	
+	
+	file << *global_table;
 	return true;
 }
 
@@ -605,6 +615,17 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 
 	string name = parent_class;
 
+
+	std::optional<string> scope = {};
+
+	if (func_kind == STE::Kind::FuncDef) {
+		AST* scope_node = get_type(children, Scope);
+		AST* scope_id_node = get_type(scope_node->children, Id);
+		if (scope_id_node && scope_id_node->value.size()) scope = { scope_id_node->value };
+	}
+	else {
+		scope = { parent_class };
+	}
 	
 
 	const AST* type_node = get_type(children, Type);
@@ -616,7 +637,7 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 		name = id->value;
 	}
 
-	SymbolTable* func_table = new SymbolTable(name);
+	SymbolTable* func_table = new FunctionSymbolTable(name);
 
 	const AST* param_list = get_type(children, ParamList);
 
@@ -658,7 +679,7 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 
 	STE::Visibility visibility = get_visibility(visibility_node);
 
-	return new SymbolTableEntry(unique_id, name, func_kind, type, line_location, visibility, func_table, func_node);
+	return new SymbolTableEntry(unique_id, name, func_kind, type, line_location, visibility, func_table, func_node, scope);
 }
 
 STE::Visibility SemanticAnalyzer::get_visibility(const AST* visibility_node) {
@@ -709,8 +730,9 @@ vector<int> SemanticAnalyzer::get_dimensions(const std::vector <AST*> dimension_
 	vector<int> dimensions;
 
 	for (AST* dimension : dimension_nodes) {
+		
 		int value = -1;
-		if (dimension->value.size()) value = stoi(dimension->value);
+		if (dimension->children.size() == 1) value = stoi(dimension->children[0]->value);
 		dimensions.push_back(value);
 	}
 		
@@ -772,8 +794,14 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* root) {
 
 				if (current_entry) {
 					if (current_entry->kind == STE::Kind::FuncDecl) {
+						// replace funcdecl
+						class_symbol_table->entries.insert({entry->unique_id, entry});
+						entry->visibility = current_entry->visibility;
+
 						current_entry->kind = entry->kind;
 						current_entry->line_location = entry->line_location;
+						current_entry->node = entry->node;
+						current_entry->node->entry = entry;
 
 						delete current_entry->link;
 

@@ -637,7 +637,7 @@ void Parser::skip_errors(Token& current_token) {
 		pop();
 	}
 	else {
-		while (!(in_first(top(), current_token.token_type) || (is_nullable(top()) && in_follow(top(), current_token.token_type))))
+		while (la.has_next_token() && !(in_first(top(), current_token.token_type) || (is_nullable(top()) && in_follow(top(), current_token.token_type))))
 			current_token = get_next_token();
 	}
 	token_type;

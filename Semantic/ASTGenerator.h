@@ -46,7 +46,7 @@ private:
 	void add_top(std::vector<AST*>& children);
 	bool top_in_shape(std::unordered_map<std::string, int>& current_shape);
 	void transform_tree(AST* root);
-	AST* create_dot(std::vector<AST*>& children);
+	AST* create_dot(std::vector<AST*>& children, int index);
 	void convert_dot_lists(AST* node);
 public:
 	static const std::unordered_map<std::string, std::unordered_map<std::string, int>> m_trees;
