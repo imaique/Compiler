@@ -538,7 +538,7 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 		load_value(number_entry, r);
 		AST* sign_node = get_type(children, Sign);
 		string sign = sign_node->value;
-		if (sign == "minus") {
+		if (sign == "-") {
 			write_instruction("sub " + r + ",r0," + r);
 		}
 		else if (sign == "not") {
