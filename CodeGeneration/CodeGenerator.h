@@ -9,7 +9,7 @@ private:
 	std::ofstream moon_file;
 	AST* const root;
 	SymbolTable* const global_table;
-	std::unordered_map<std::string, int> known_sizes{ {"integer", 4},{"float", 8}, {"void", 0} };
+	std::unordered_map<std::string, int> known_sizes{ {"integer", 4},{"float", 4}, {"void", 0} };
 	std::unordered_map<std::string, std::string> func_entry_to_short_name;
 	std::string get_register();
 	std::string get_short_function_name(std::string unique_id);

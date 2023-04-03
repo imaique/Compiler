@@ -16,6 +16,7 @@ void CodeGenerator::generate() {
 	get_memory_blocks();
 
 	generate_code();
+	moon_file.close();
 	return;
 }
 

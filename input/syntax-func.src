@@ -1,17 +1,34 @@
 
 function main() => void
 {
-  localvar arr: integer[3];
-  localvar temp: integer;
-  arr[0] = 1;
-  arr[1] = 2;
-  arr[2] = 3;
-  temp = arr[0];  
-  arr[0] = arr[0+1];
-  arr[0+1] = temp;
-  write(arr[0]);
-  write(arr[1]);
+  localvar a: POLYNOMIAL[3];
+  a[0].x.z = 3;
+  write(a[0].x.z);
+
+  localvar input: integer;
+  read(input);
+
+  localvar b: POLYNOMIAL(input);
+  write(b.b);
 }
+
+class POLYNOMIAL {
+  public  constructor: (x: integer);
+  public attribute a: integer;
+  public attribute b: integer;
+  public attribute x: XD;
+};
+
+function POLYNOMIAL::constructor(x: integer)
+{
+  b = x;
+}
+
+class XD {
+  public attribute z: integer;
+};
+
+
 /*
 
 function main() => void
