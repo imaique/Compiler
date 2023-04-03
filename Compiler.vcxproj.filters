@@ -45,10 +45,10 @@
     <ClCompile Include="Utils\utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="semanticanalyzerdriver.cpp">
+    <ClCompile Include="CodeGeneration\CodeGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CodeGeneration\CodeGenerator.cpp">
+    <ClCompile Include="compilerdrivercpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

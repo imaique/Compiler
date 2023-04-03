@@ -105,10 +105,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CodeGeneration\CodeGenerator.cpp" />
+    <ClCompile Include="compilerdrivercpp.cpp" />
     <ClCompile Include="LexicalAnalyzer\LexicalAnalyzer.cpp" />
     <ClCompile Include="LexicalAnalyzer\State\State.cpp" />
     <ClCompile Include="LexicalAnalyzer\Token.cpp" />
-    <ClCompile Include="semanticanalyzerdriver.cpp" />
     <ClCompile Include="Semantic\AST.cpp" />
     <ClCompile Include="Semantic\ASTGenerator.cpp" />
     <ClCompile Include="Semantic\Decorator.cpp" />
