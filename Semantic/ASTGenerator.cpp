@@ -113,11 +113,13 @@ bool ASTGenerator::perform_semantic_action(std::string action, const Token& toke
 			m_stack.pop();
 		}
 
-		while (any && m_stack.top()) {
+		while (any && !m_stack.empty() && m_stack.top()) {
 			if(!top_in_shape(current_shape)) any--;;
 			children.push_back(m_stack.top());
 			m_stack.pop();
 		}
+
+		if (any && m_stack.empty()) std::cout << "not a good amount of children for " << type << std::endl;
 
 		if (any && !m_stack.empty() && !m_stack.top()) m_stack.pop();
 
