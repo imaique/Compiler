@@ -4,7 +4,7 @@
 #include <filesystem>
 
 int main() {
-    std::vector<std::string> test_files{ "syntax-func", }; //"polynomialsemanticerrors", "example-polynomial", "example-bubblesort",
+    std::vector<std::string> test_files{ "syntax-func", "example-bubblesort" }; //"polynomialsemanticerrors", "example-polynomial", ,
 //, "full-coverage" };
 
     for (auto filename : test_files) {
