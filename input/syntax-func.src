@@ -1,11 +1,40 @@
+
 function main() => void
 {
-  localvar a: integer;
-  if(not not 1 < 2) then {} else {};
+  localvar arr: integer[3];
+  localvar temp: integer;
+  arr[0] = 1;
+  arr[1] = 2;
+  arr[2] = 3;
+  temp = arr[0];  
+  arr[0] = arr[0+1];
+  arr[0+1] = temp;
+  write(arr[0]);
+  write(arr[1]);
+}
+/*
+
+function main() => void
+{
+  localvar a: POLYNOMIAL(234);
+  //localvar b: POLYNOMIAL;
+  write(a.b);
 }
 
+class POLYNOMIAL {
+  public  constructor: (x: integer);
+  public attribute a: integer;
+  public attribute b: integer;
+};
 
-/*
+function POLYNOMIAL::constructor(x: integer)
+{
+  b = x;
+  write(self.b);
+  write(b);
+}
+
+==
 
 function main() => void
 {
