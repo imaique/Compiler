@@ -364,8 +364,12 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 		if (function_table != class_table) {
 			AST* id = get_type(left_node->children, Id);
 			if (id->value == "self") {
-				left_node->type = *function_entry->scope;
-				return resolve_type(next_node, function_entry, class_table, global_table, class_table);
+				SymbolType self_type(*function_entry->scope, vector<int>());
+				left_node->decorator.set_type(self_type);
+				node->decorator.set_type(self_type);
+				//left_node->type = *function_entry->scope;
+				SymbolType type = resolve_type(next_node, function_entry, class_table, global_table, class_table);
+				return type;
 			}
 		}
 
