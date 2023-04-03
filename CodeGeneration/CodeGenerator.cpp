@@ -55,7 +55,6 @@ void CodeGenerator::get_children_sizes(unordered_map <std::string, SymbolTableEn
 		scope_size -= abs(get_memory(child_entry, class_type));
 	}
 }
-// write(1 + 1);
 
 void CodeGenerator::generate_temporary_function_variables(AST* node, int& scope_size, int& temp_count, SymbolTable* func_table) {
 	for (AST* child_node : node->children) generate_temporary_function_variables(child_node, scope_size, temp_count, func_table);
@@ -107,7 +106,7 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 	const string& node_type = node->type;
 	const vector<AST*>& children = node->children;
 	SymbolTableEntry* node_entry = node->entry;
-	if (class_table && node_type != FuncDef) return nullptr;
+	if (class_table && !function_scope) return nullptr;
 	if (node_type == Statement) {
 		// needs to be in here because function_scope might be null at root
 		SymbolTable* function_table = function_scope->link;
@@ -247,11 +246,15 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 		AST* id_node = get_type(node->children, Id);
 		std::string variable_name = id_node->value;
 
-		if (variable_name == "self") return function_table->get_entry("_self");
+		if (variable_name == "self") {
+			SymbolTableEntry* self = function_table->get_entry("_self");
+			self->is_reference = true;
+			return self;
+		}
 
 		write_comment(variable_name + " to " + node_entry->name);
 
-		SymbolTableEntry* variable_entry = dot_entry;
+		SymbolTableEntry* variable_entry = nullptr;
 
 		string r = get_register();
 
@@ -263,6 +266,7 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 			
 			load_word(dot_entry, r);
 			integer_add(r, r, data_member_entry->get_offset());
+			variable_entry = data_member_entry;
 		}
 		else {
 			variable_entry = function_table->get_entry(variable_name);
@@ -282,6 +286,7 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 				variable_entry = object_class_table->get_entry(variable_name);
 
 				load_word(object_entry, r);
+				//register_add(r, r, "r14");
 				integer_add(r, r, variable_entry->get_offset());
 			}
 		}
@@ -324,6 +329,7 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 		free_register(multipler_reg);
 		return node_entry;
 	}
+
 	else if (node_type == FuncCall) {
 
 		AST* id = get_type(children, Id);
@@ -423,7 +429,72 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 
 		return node_entry;
 	}
-	
+	else if (node_type == VarDecl && function_scope) {
+		AST* argument_list_node = get_type(children, AParamList);
+		if (!argument_list_node) return nullptr;
+		//AST* type_node = get_type(children, Type);
+		AST* id_node = get_type(children, Id);
+
+		const string var_id = id_node->value;
+		SymbolTableEntry* self_argument = function_scope->link->get_entry(var_id);
+
+		SymbolTable* calling_function_table = function_scope->link;
+		const string class_name = node_entry->type->type_id;
+		SymbolTable* class_table = global_table->get_entry(class_name)->link;
+
+		vector<SymbolType> argument_types;
+		vector<SymbolTableEntry*> argument_entries;
+		for (AST* param : argument_list_node->children) {
+			SymbolTableEntry* argument_entry = generate_code(param, function_scope, class_table, dot_entry);
+			argument_entries.push_back(argument_entry);
+
+			SymbolType param_type = param->decorator.get_type();
+			argument_types.push_back(param_type);
+		}
+
+		const string signature = FunctionSymbolType::get_signature(argument_types);
+
+		const string unique_id = class_name + signature;
+
+		SymbolTableEntry* function_entry = class_table->get_entry(unique_id);
+
+		const string stack_frame_size = calling_function_table->get_scope_size();
+		const int scope_size = calling_function_table->scope_size;
+
+		std::string short_name = get_short_function_name(function_entry->unique_id);
+
+		FunctionSymbolTable* jumping_function_table = static_cast<FunctionSymbolTable*>(function_entry->link);
+
+		const vector<SymbolTableEntry*>& parameters = jumping_function_table->parameters;
+
+		const string argument_reg = get_register();
+
+		for (int i = 0; i < argument_entries.size(); i++) {
+			SymbolTableEntry* argument = argument_entries[i];
+			SymbolTableEntry* parameter = parameters[i];
+
+			if (argument->type->is_basic_type()) load_value(argument, argument_reg);
+			else load_word(argument, argument_reg);
+			const int parameter_offset = parameter->offset + scope_size;
+			store_word(to_string(parameter_offset), argument_reg);
+		}
+
+		SymbolTableEntry* self_entry = jumping_function_table->get_entry("_self");
+
+		if (self_entry) {
+			integer_add(argument_reg, "r0", self_argument->get_offset());
+			register_add(argument_reg, argument_reg, "r14");
+			const int parameter_offset = self_entry->offset + scope_size;
+			store_word(to_string(parameter_offset), argument_reg);
+		}
+
+		free_register(argument_reg);
+
+		integer_add("r14", "r14", stack_frame_size);
+		write_instruction("jl r15," + short_name);
+
+		write_instruction("subi r14,r14," + stack_frame_size);
+	}
 	else if (node_type == Dot) {
 		AST* left = children[0];
 		AST* right = children[1];
@@ -442,10 +513,6 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 	}
 	else if (node_type == Dim) {
 		return generate_code(children[0], function_scope, class_table, nullptr);
-	}
-	// only consider declarations within a function scope
-	else if (node_type == VarDecl && function_scope) {
-
 	}
 	else if (node_type == AssignStat) {
 		AST* left = children[0];
