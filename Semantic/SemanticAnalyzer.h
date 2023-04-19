@@ -3,19 +3,12 @@
 #include "AST.h"
 #include "SymbolTable.h"
 #include <unordered_set>
+#include "../Compiler/CompilerError.h"
 
 class SemanticAnalyzer {
-private:
-	class SemanticError {
-	public:
-		int line_location;
-		std::string text;
-
-		SemanticError(std::string text, int line_location);
-	};
-	
-	std::vector<SemanticError> errors;
-	std::vector<SemanticError> warnings;
+private:	
+	std::vector<CompilerError> errors;
+	std::vector<CompilerError> warnings;
 	void add_error(std::string text, int line);
 	void add_warning(std::string text, int line);
 	void print_errors();
@@ -39,9 +32,6 @@ private:
 	SymbolType resolve_type(AST* node, const SymbolTableEntry* function_entry, const SymbolTable* class_table, const SymbolTable* global_table, const SymbolTable* dot_class_table);
 
 	SymbolTableEntry::Visibility get_visibility(const AST* visibility_node);
-
-	friend bool operator<(const SemanticAnalyzer::SemanticError& p1, const SemanticAnalyzer::SemanticError& p2);
-
 public:
 
 	SemanticAnalyzer(std::string filename);

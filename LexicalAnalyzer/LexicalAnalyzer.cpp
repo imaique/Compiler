@@ -1,5 +1,6 @@
 #include "LexicalAnalyzer.h"
 #include <sstream>
+#include "../Compiler/Compiler.h"
 
 typedef std::string string;
 typedef Token::Type TT;
@@ -21,10 +22,6 @@ void LexicalAnalyzer::increment_line() {
 	index = 0;
 	line_number++;
 	trim();
-	/*
-	token_file << std::endl;
-	error_file << std::endl;
-	*/
 }
 
 
@@ -91,6 +88,9 @@ void LexicalAnalyzer::print_token(Token token) {
 	token_file << token;
 
 	if (token.is_error) {
+		error = true;
+
+		Compiler::add_error(CompilerError(Token::get_error_string(token.token_type), location));
 		error_file << "Lexical error: " << Token::get_error_string(token.token_type) << ": ";
 		error_file << "\"" << token.lexeme << "\": line " << location << std::endl;
 	}
@@ -112,6 +112,9 @@ bool LexicalAnalyzer::has_next_token() {
 	skip_empty_lines();
 	if (index < line.size()) return true;
 	else {
+		if (!token_file.is_open()) return false;
+		if(error) std::cout << "Lexical error(s) detected." << std::endl;
+		std::cout << "Lexical Analysis complete." << std::endl;
 		token_file.close();
 		error_file.close();
 		return false;

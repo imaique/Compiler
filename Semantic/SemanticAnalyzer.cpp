@@ -5,6 +5,7 @@
 #include "../Utils/utils.h"
 #include "SymbolTable.h"
 #include "../CodeGeneration/CodeGenerator.h"
+#include "../Compiler/Compiler.h"
 
 
 using std::string;
@@ -30,17 +31,15 @@ SemanticAnalyzer::SemanticAnalyzer(string filename) : filename(filename) {
 
 }
 
-SemanticAnalyzer::SemanticError::SemanticError(std::string text, int line_location) : text(text), line_location(line_location) {
-
-}
 
 void SemanticAnalyzer::add_error(std::string text, int line) {
-	SemanticError error("Error: " + text, line);
+	CompilerError error("Error: " + text, line);
 	errors.push_back(error);
+	Compiler::add_error(error);
 }
 
 void SemanticAnalyzer::add_warning(std::string text, int line) {
-	SemanticError warning("Warning: " + text, line);
+	CompilerError warning("Warning: " + text, line);
 	warnings.push_back(warning);
 }
 
@@ -66,19 +65,10 @@ void SemanticAnalyzer::check_types(AST* root, SymbolTable* global_table) {
 		}
 		AST* stat_block = get_type(func_def->children, StatBlock);
 		SymbolType return_type = resolve_type(stat_block, function_entry, class_table, global_table);
-		cout << function_entry->unique_id << " " << return_type << endl;
+
 		if ((return_type != *function_entry->type) && (constructor_type != *function_entry->type) && !(return_type == SymbolType::OK && *function_entry->type == SymbolType::VOID)) {
 			add_error("Missing valid return statement in function " + function_entry->unique_id, func_def->line_start);
-			cout << *function_entry->type << endl;
 		}
-		/*
-		cout << func_def->decorator.function_entry->unique_id << endl;
-		for (AST* statement : stat_block->children) {
-			if (statement->type != VarDecl) {
-				cout << resolve_type(statement, function_entry, class_table, global_table) << endl;
-			}
-		}
-		*/
 	}
 }
 
@@ -180,7 +170,6 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			vector<int> dimensions;
 			for (AST* dim : dim_list->children) {
 				SymbolType dim_type = resolve_type(dim, function_entry, class_table, global_table);
-				//cout << "wtf " << dim_type;
 				if (dim_type != SymbolType::INTEGER) {
 					add_error("Indices must be of integer type.", node->line_start);
 					return SymbolType::INVALID;
@@ -508,37 +497,38 @@ bool SemanticAnalyzer::analyze() {
 	if (!root) return false;
 
 	SymbolTable* global_table = construct_symbol_tables(root);
-	std::ofstream file("output/outsemantic/" + filename + ".outsymboltables");
-	//file << *global_table;
+	std::ofstream symbol_table_file("output/outsemantic/" + filename + ".outsymboltables");
+	std::ofstream code_table_file("output/outsemantic/" + filename + ".outcodetables");
+
+
 
 	migrate_line_locations(root);
 	perform_semantic_checks(root, global_table);
 
 	print_errors();
+	if (warnings.size()) std::cout << "Logged semantic warning(s)." << std::endl;
+	if(errors.size()) std::cout << "Logged semantic error(s)." << std::endl;
+	std::cout << "Semantic Analysis complete." << std::endl;
 
+	symbol_table_file << *global_table;
 	
 	CodeGenerator code_generator(filename, root, global_table);
 	if (!errors.size()) code_generator.generate();
 	else code_generator.write_comment("semantic errors");
 	
+	code_table_file << *global_table;
 	
-	file << *global_table;
 	return true;
-}
-
-bool operator<(const SemanticAnalyzer::SemanticError& e1, const SemanticAnalyzer::SemanticError& e2)
-{
-	return e1.line_location < e2.line_location;
 }
 
 void SemanticAnalyzer::print_errors() {
 	std::ofstream file("output/outsemantic/" + filename + ".outsemanticerrors");
-	vector<SemanticError> errors_warnings;
+	vector<CompilerError> errors_warnings;
 	errors_warnings.insert(errors_warnings.end(), errors.begin(), errors.end());
 	errors_warnings.insert(errors_warnings.end(), warnings.begin(), warnings.end());
 	std::sort(errors_warnings.begin(), errors_warnings.end());
 
-	for (SemanticError error : errors_warnings) {
+	for (CompilerError error : errors_warnings) {
 		file << error.text;
 		if(error.line_location >= 0) file << " (line " << error.line_location << ")";
 		file << endl;

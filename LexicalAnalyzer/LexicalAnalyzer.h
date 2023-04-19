@@ -9,6 +9,7 @@ class LexicalAnalyzer {
 	State* state;
 	int index;
 	int line_number;
+	bool error = false;
 	std::string line;
 	std::ofstream token_file;
 	int last_token_line;
