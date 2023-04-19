@@ -51,6 +51,12 @@
     <ClCompile Include="compilerdrivercpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Compiler\Compiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Compiler\CompilerError.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LexicalAnalyzer\State\State.h">
@@ -84,6 +90,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CodeGeneration\CodeGenerator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Compiler\Compiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Compiler\CompilerError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

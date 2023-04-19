@@ -105,6 +105,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CodeGeneration\CodeGenerator.cpp" />
+    <ClCompile Include="Compiler\CompilerError.cpp" />
+    <ClCompile Include="Compiler\Compiler.cpp" />
     <ClCompile Include="compilerdrivercpp.cpp" />
     <ClCompile Include="LexicalAnalyzer\LexicalAnalyzer.cpp" />
     <ClCompile Include="LexicalAnalyzer\State\State.cpp" />
@@ -119,6 +121,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CodeGeneration\CodeGenerator.h" />
+    <ClInclude Include="Compiler\CompilerError.h" />
+    <ClInclude Include="Compiler\Compiler.h" />
     <ClInclude Include="LexicalAnalyzer\LexicalAnalyzer.h" />
     <ClInclude Include="LexicalAnalyzer\State\State.h" />
     <ClInclude Include="LexicalAnalyzer\Token.h" />
