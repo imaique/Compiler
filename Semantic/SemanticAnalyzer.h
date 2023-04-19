@@ -28,6 +28,7 @@ private:
 	void perform_semantic_checks(AST* root, SymbolTable* global_table);
 	void pull_members(SymbolTableClassEntry* class_entry, SymbolTableClassEntry* parent_entry);
 	void traverse_parents(SymbolTableClassEntry* class_entry, std::unordered_set<SymbolTableClassEntry*>& augmented_classes, std::unordered_set<SymbolTableClassEntry*>& current_path, const SymbolTable* global_table);
+	void traverse_children(SymbolTableClassEntry* class_entry, std::unordered_set<SymbolTableClassEntry*>& current_path, const SymbolTable* global_table);
 	SymbolType resolve_type(AST* node, const SymbolTableEntry* function_entry, const SymbolTable* class_table, const SymbolTable* global_table);
 	SymbolType resolve_type(AST* node, const SymbolTableEntry* function_entry, const SymbolTable* class_table, const SymbolTable* global_table, const SymbolTable* dot_class_table);
 

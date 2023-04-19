@@ -60,7 +60,7 @@ void SemanticAnalyzer::check_types(AST* root, SymbolTable* global_table) {
 		
 		if (!function_entry) {
 			const AST* id_node = get_type(func_def->children, Id);
-			add_error("Cannot perform a semantic analysis of " + id_node->value + " because of missing declaration(s) and/or missing definition(s).", func_def->line_start);
+			add_error("6.1, 11.4 Cannot perform a semantic analysis of " + id_node->value + " because of missing declaration(s) and/or missing definition(s).", func_def->line_start);
 			continue;
 		}
 		AST* stat_block = get_type(func_def->children, StatBlock);
@@ -98,13 +98,13 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 		SymbolTableEntry* variable_entry = function_table->get_entry(variable_name);
 
 		if (!variable_entry) {
-			add_error("Cannot declare variable of an non-existent class \"" + type_name + "\".", node->line_start);
+			add_error("11.5 Cannot declare variable of an non-existent class \"" + type_name + "\".", node->line_start);
 			return SymbolType::INVALID;
 		}
 
 		// if data member
 		if (function_entry && class_table) {
-			add_warning("Local variable " + variable_name + " in member function " + function_entry->name +  " shadows data member of " + class_table->name + " with the same name.", node->line_start);
+			add_warning("8.7 Local variable " + variable_name + " in member function " + function_entry->name +  " shadows data member of " + class_table->name + " with the same name.", node->line_start);
 		}
 
 		const AST* dim_list = get_type(children, DimList);
@@ -118,7 +118,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			for (AST* dim : dim_list->children) {
 				SymbolType dim_type = resolve_type(dim, function_entry, class_table, global_table);
 				if (dim_type != SymbolType::INTEGER) {
-					add_error("Indices must be of integer type.", node->line_start);
+					add_error("13.2 Indices must be of integer type.", node->line_start);
 					return SymbolType::INVALID;
 				}
 				AST* int_node = get_type(dim->children, IntNum);
@@ -140,7 +140,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			SymbolTableEntry* constructor_entry = variable_class_entry->link->get_entry(unique_id);
 
 			if (!constructor_entry) {
-				add_error("There doesn't exist a constructor with signature " + signature + " for class " + type_name + ".", line_start);
+				add_error("12.1, 12.2, 13.1 There doesn't exist a constructor with signature " + signature + " for class " + type_name + ".", line_start);
 				return SymbolType::INVALID;
 			}
 		}
@@ -161,6 +161,9 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 
 		if (dot_class_table) {
 			variable_entry = dot_class_table->get_entry(variable_name);
+			if (dot_class_table != class_table && variable_entry && variable_entry->visibility == SymbolTableEntry::Visibility::Private) {
+				add_error("8.5 Prohibited access to private member " + variable_name + " of " + dot_class_table->name, node->line_start);
+			}
 		}
 		else {
 			variable_entry = function_table->get_entry(variable_name);
@@ -176,7 +179,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			for (AST* dim : dim_list->children) {
 				SymbolType dim_type = resolve_type(dim, function_entry, class_table, global_table);
 				if (dim_type != SymbolType::INTEGER) {
-					add_error("Indices must be of integer type.", node->line_start);
+					add_error("13.2 Indices must be of integer type.", node->line_start);
 					return SymbolType::INVALID;
 				}
 				dimensions.push_back(-1);
@@ -190,7 +193,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			for (int dimension : dimensions) {
 				if (variable_dimensions.empty()) {
 					stringstream ss;
-					ss << "Variable " + variable_name + " of type " << variable_type << " does not support a " << dimensions.size() << "-dimensonal access.";
+					ss << "13.1 Variable " + variable_name + " of type " << variable_type << " does not support a " << dimensions.size() << "-dimensonal access.";
 					add_error(ss.str(), node->line_start);
 					return SymbolType::INVALID;
 				}
@@ -201,7 +204,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			return node->decorator.get_type();
 		}
 		else {
-			add_error("Reference to undeclared variable " + variable_name + ".", node->line_start);
+			add_error("11.1, 11.2 Reference to undeclared variable " + variable_name + ".", node->line_start);
 			return SymbolType::INVALID;
 		}
 	}
@@ -238,7 +241,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			return *function_entry->type;
 		}
 		else {
-			add_error("Reference to undeclared or undefined function " + unique_id + ".", node->line_start);
+			add_error("11.3, 11.4 Reference to undeclared or undefined function " + unique_id + ".", node->line_start);
 			return SymbolType::INVALID;
 		}
 	}
@@ -257,12 +260,12 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 		SymbolType t2 = resolve_type(children[2], function_entry, class_table, global_table);
 
 		if (t1 != SymbolType::FLOAT && t1 != SymbolType::INTEGER) {
-			add_error("Cannot perform binary operations on types that aren't numbers.", node->line_start);
+			add_error("10.1 Cannot perform binary operations on types that aren't numbers.", node->line_start);
 			return SymbolType::INVALID;
 		}
 
 		if (!same_type(t1, t2)) {
-			add_error("Types are not the same on both sides of the operation.", node->line_start);
+			add_error("10.1 Types are not the same on both sides of the operation.", node->line_start);
 			return SymbolType::INVALID;
 		}
 		node->decorator.set_type(t1);
@@ -273,12 +276,12 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 		SymbolType t2 = resolve_type(children[1], function_entry, class_table, global_table);
 
 		if (t1.dimensions.size()) {
-			add_error("Cannot assign a value to an array.", node->line_start);
+			add_error("10.2 Cannot assign a value to an array.", node->line_start);
 			return SymbolType::INVALID;
 		}
 
 		if (!same_type(t1, t2)) {
-			add_error("Types are not the same on both sides of the assignment.", node->line_start);
+			add_error("10.2 Types are not the same on both sides of the assignment.", node->line_start);
 			return SymbolType::INVALID;
 		}
 		return SymbolType::OK;
@@ -300,7 +303,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 				if (*return_type != SymbolType::INVALID && current_type != SymbolType::OK) {
 					if (current_type != *return_type) {
 						if (*return_type != SymbolType::OK) {
-							add_error("Inconsistent return types in statement block.", node->line_start);
+							add_error("10.3 Inconsistent return types in statement block.", node->line_start);
 							return SymbolType::INVALID;
 						}
 						return_type = new SymbolType(current_type);
@@ -318,7 +321,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			SymbolType return_type = resolve_type(children[1], function_entry, class_table, global_table);
 			if (return_type != *function_entry->type) {
 				stringstream ss;
-				ss << "Type mismatch. Returns " << return_type << ". Expected " << *function_entry->type << ".";
+				ss << "10.3 Type mismatch. Returns " << return_type << ". Expected " << *function_entry->type << ".";
 				add_error(ss.str(), node->line_start);
 				return SymbolType::INVALID;
 			}
@@ -372,7 +375,7 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 		if (start_type.dimensions.size()) {
 			stringstream ss;
 			ss << start_type;
-			add_error("An array does not have any members. Calling member on " + ss.str() + ".", line_start);
+			add_error("10.1 An array does not have any members. Calling member on " + ss.str() + ".", line_start);
 			return SymbolType::INVALID;
 		}
 
@@ -381,31 +384,11 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 		if (!class_entry) {
 			stringstream ss;
 			ss << start_type;
-			add_error("Cannot call member on \"" + ss.str() + "\" which is either not a class or an undeclared class.", line_start);
+			add_error("10.1, 11.5, 15.1 Cannot call member on \"" + ss.str() + "\" which is either not a class or an undeclared class.", line_start);
 			return SymbolType::INVALID;
 		}
 
 		SymbolTable* current_table = class_entry->link;
-
-		/*
-		while (next_node->type == Dot) {
-			left_node = next_node->children[0];
-
-			SymbolType left_type = resolve_type(left_node, current_table, current_table, global_table);
-
-			if (left_type.dimensions.size()) {
-				stringstream ss;
-				ss << left_type;
-				add_error("An array does not have any members. Calling member on " + ss.str() + ".", left_node->line_start);
-				return SymbolType::INVALID;
-			}
-
-			class_entry = global_table->get_entry(start_type.type_id);
-			current_table = class_entry->link;
-
-			next_node = next_node->children[1];
-		}
-		*/
 		node->decorator.set_type(start_type);
 		return resolve_type(next_node, function_entry, class_table, global_table, current_table);
 	}
@@ -443,7 +426,7 @@ void SemanticAnalyzer::check_function_names(SymbolTable* global_table) {
 				func_id_list.push_back(function_id);
 			}
 			else if (entry->kind == EntryKind::FuncDecl) {
-				add_error("Function " + scope + function_name +  " is declared but never defined", entry->line_location);
+				add_error("6.2 Function " + scope + function_name +  " is declared but never defined", entry->line_location);
 			}
 		}
 
@@ -462,10 +445,10 @@ void SemanticAnalyzer::check_function_names(SymbolTable* global_table) {
 				}
 
 				if (function_name == "main" && table->name == "global") {
-					add_error("Multiple main functions with different signatures: " + ss.str() + ".", -1);
+					add_error("15.3 Multiple main functions with different signatures: " + ss.str() + ".", -1);
 				}
 				else {
-					add_warning("Function " + scope + function_name + " overloaded: " + ss.str() + ".", -1);
+					add_warning("9.1, 9.2 Function " + scope + function_name + " overloaded: " + ss.str() + ".", -1);
 				}
 			}
 		}
@@ -563,7 +546,7 @@ SymbolTableClassEntry* SemanticAnalyzer::generate_class_entry(AST* class_node) {
 		SymbolTableEntry* duplicate_entry = class_table->add_entry_if_new(entry);
 
 		if (entry != duplicate_entry) {
-			add_error("There already exists a variable of the name " + entry->name + " in class " + name + " at line " + to_string(duplicate_entry->line_location) + ".", line_location);
+			add_error("8.3 There already exists a variable of the name " + entry->name + " in class " + name + " at line " + to_string(duplicate_entry->line_location) + ".", line_location);
 		}
 	}
 
@@ -575,7 +558,7 @@ SymbolTableClassEntry* SemanticAnalyzer::generate_class_entry(AST* class_node) {
 		SymbolTableEntry* duplicate_entry = class_table->add_entry_if_new(entry);
 
 		if (entry != duplicate_entry) {
-			add_error("There already exists a method of the name " + entry->unique_id + " in class " + name + " at line " + to_string(duplicate_entry->line_location) + ".", line_location);
+			add_error("8.3(ish) There already exists a method of the name " + entry->unique_id + " in class " + name + " at line " + to_string(duplicate_entry->line_location) + ".", line_location);
 		}
 	}
 
@@ -650,7 +633,7 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 		SymbolTableEntry* duplicate_entry = func_table->add_entry_if_new(entry);
 
 		if (entry != duplicate_entry) {
-			add_error("There already exists a parameter of the name " + entry->name + " at line " + to_string(duplicate_entry->line_location) + ".", line_location);
+			add_error("There already exists a parameter of the name " + entry->name + ".", line_location);
 		}
 		else {
 			parameters.push_back(*entry->type);
@@ -669,7 +652,7 @@ SymbolTableEntry* SemanticAnalyzer::generate_function_entry(AST* func_node, STE:
 			SymbolTableEntry* duplicate_entry = func_table->add_entry_if_new(entry);
 
 			if (entry != duplicate_entry) {
-				add_error("There already exists a variable or parameter of the name " + entry->name + " at line " + to_string(duplicate_entry->line_location) + ".", entry->line_location);
+				add_error("8.4 There already exists a variable or parameter of the name " + entry->name + " at line " + to_string(duplicate_entry->line_location) + ".", entry->line_location);
 			}
 		}
 	}
@@ -761,7 +744,7 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* root) {
 		// there's already a class of this name
 		if (duplicate_entry != entry) {
 			stringstream ss;
-			ss << "The class " << entry->name << " has already been declared at line " << duplicate_entry->line_location << ".";
+			ss << "8.1 The class " << entry->name << " has already been declared at line " << duplicate_entry->line_location << ".";
 			add_error(ss.str(), entry->line_location);
 		}
 		else {
@@ -811,15 +794,15 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* root) {
 						func_def->decorator.class_entry = class_entry;
 					}
 					else {
-						add_error("The function " + entry->unique_id + " is already defined in class " + class_name + ".", entry->line_location);
+						add_error("The function " + entry->unique_id + " is already defined for class " + class_name + ".", entry->line_location);
 					}
 				}
 				else {
-					add_error("No function declaration for " + entry->unique_id + " in class " + class_name + ".", entry->line_location);
+					add_error("6.1 No function declaration for " + entry->unique_id + " in class " + class_name + ".", entry->line_location);
 				}
 			}
 			else {
-				add_error("The class " + class_name + " does not exist.", scope_id->token->line_location);
+				add_error("11.5 The class " + class_name + " does not exist.", scope_id->token->line_location);
 			}
 		}
 		else {
@@ -837,15 +820,48 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* root) {
 		}
 	}
 
-	if (!main_func) add_error("Missing main function.", -1);
+	if (!main_func) add_error("15.2 Missing main function.", -1);
 
 	unordered_set<SymbolTableClassEntry*> augmented_classes;
 	for (SymbolTableClassEntry* class_entry : class_entries) {
 		unordered_set<SymbolTableClassEntry*> current_path;
 		traverse_parents(class_entry, augmented_classes, current_path, global_table);
+		current_path.clear();
+		traverse_children(class_entry, current_path, global_table);
 	}
 
 	return global_table;
+}
+void SemanticAnalyzer::traverse_children(SymbolTableClassEntry* class_entry, std::unordered_set<SymbolTableClassEntry*>& current_path, const SymbolTable* global_table) {
+	if (current_path.count(class_entry)) {
+		std::stringstream ss;
+		bool first = true;
+		for (SymbolTableClassEntry* visited_class : current_path) {
+			if (first) first = false;
+			else ss << ", ";
+			ss << visited_class->name;
+		}
+		add_error("14.1 Circular data member found: " + ss.str(), class_entry->line_location);
+		return;
+	}
+	current_path.insert(class_entry);
+	for (const auto& entry_pair : class_entry->link->entries) {
+		SymbolTableEntry* data_member = entry_pair.second;
+		if (data_member->kind == EntryKind::Data) {
+			SymbolTableEntry* data_class_entry = global_table->get_entry(data_member->name);
+			string type_id = data_member->type->type_id;
+			if (data_class_entry) {
+				SymbolTableClassEntry* parent_class_entry = static_cast<SymbolTableClassEntry*>(data_class_entry);
+				traverse_children(parent_class_entry, current_path, global_table);
+			}
+			// NO NEED?
+			else if(type_id != "integer" && type_id != "float") {
+				add_error("11.5 Class " + class_entry->name + " cannot have a data member from non-existent class " + data_member->name + ".", class_entry->line_location);
+			}
+		}
+	}
+	current_path.erase(class_entry);
+	return;
 }
 
 void SemanticAnalyzer::pull_members(SymbolTableClassEntry* class_entry, SymbolTableClassEntry* parent_entry) {
@@ -857,7 +873,7 @@ void SemanticAnalyzer::pull_members(SymbolTableClassEntry* class_entry, SymbolTa
 			string member_unique_id = parent_member->unique_id;
 			SymbolTableEntry* main_dup_entry = child_table->get_entry(member_unique_id);
 			if (main_dup_entry) {
-				add_warning("Member " + member_unique_id + " in " + class_entry->name + " is overriding the one defined in " + parent_entry->name + ".", main_dup_entry->line_location);
+				add_warning("8.6, 9.3 Member " + member_unique_id + " in " + class_entry->name + " is overriding the one defined in " + parent_entry->name + ".", main_dup_entry->line_location);
 			}
 			else {
 				if (class_entry->inherited_members.count(member_unique_id)) {
@@ -882,7 +898,7 @@ void SemanticAnalyzer::traverse_parents(SymbolTableClassEntry* class_entry, unor
 			else ss << ", ";
 			ss << visited_class->name;
 		}
-		add_error("Circular inheritance found: " + ss.str(), class_entry->line_location);
+		add_error("14.1 Circular inheritance found: " + ss.str(), class_entry->line_location);
 		return;
 	}
 	current_path.insert(class_entry);
@@ -896,7 +912,7 @@ void SemanticAnalyzer::traverse_parents(SymbolTableClassEntry* class_entry, unor
 				traverse_parents(parent_class_entry, augmented_classes, current_path, global_table);
 				pull_members(class_entry, parent_class_entry);
 			} else{
-				add_error("Class " + class_entry->name + " cannot inherit from non-existent class " + inherit_entry->name + ".", class_entry->line_location);
+				add_error("11.5 Class " + class_entry->name + " cannot inherit from non-existent class " + inherit_entry->name + ".", class_entry->line_location);
 			}
 		}
 	}
