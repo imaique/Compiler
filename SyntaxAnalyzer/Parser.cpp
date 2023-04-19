@@ -513,7 +513,7 @@ bool Parser::parse() {
 	Token current_token = get_next_token();
 	Token previous_token = current_token;
 
-	while (stack.top() != "$" && current_token.token_type != Token::Type::EndOfFile) {
+	while (stack.top() != "$"){ //&& current_token.token_type != Token::Type::EndOfFile) {
 		string top = stack.top();
 
 		string current_token_string_type = Token::get_string(current_token.token_type);
