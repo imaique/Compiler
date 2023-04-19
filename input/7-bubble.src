@@ -1,0 +1,103 @@
+/*
+1.1  Allocate memory for basic types (integer, float).
+1.2  Allocate memory for arrays of basic types.
+1.3  Allocate memory for objects.
+1.4  Allocate memory for arrays of objects.
+2.1  Branch to a function’s code block, execute the code block, branch back to the calling function.
+2.2  Pass parameters as local values to the function’s code block.
+2.3  Upon execution of a return statement, pass the return value back to the calling function.
+2.4  Call to member functions that can use their object’s data members.
+3.1 Assignment statement: assignment of the resulting value of an expression to a variable, independently of what is the expression to the right of the assignment operator.
+3.2 Conditional statement: implementation of a branching mechanism.
+3.3 Loop statement: implementation of a branching mechanism.
+3.4 Input/output statement: Moon machine keyboard input/console output
+4.1. For arrays of basic types (integer and float), access to an array’s elements.
+4.2. For arrays of objects, access to an array’s element’s data members.
+4.3. For objects, access to members of basic types.
+4.4. For objects, access to members of array or object types.
+5.1. Computing the value of an entire complex expression.
+5.2. Expression involving an array factor whose indexes are themselves expressions.
+5.3. Expression involving an object factor referring to object members.
+*/
+
+// Assignment 5 coverage:
+//      -------------
+//      | YES | NO  |
+//      ------------- 
+// 1.1: |  X  |     |
+// 1.2: |  X  |     |
+// 1.3: |     |  X  |
+// 1.4: |     |  X  |
+// 2.1: |  X  |     |
+// 2.2: |  X  |     |
+// 2.3: |     |  X  |
+// 2.4: |     |  X  |
+// 3.1: |  X  |     |
+// 3.2: |  X  |     |
+// 3.3: |  X  |     |
+// 3.4: |  X  |     |
+// 4.1: |  X  |     |
+// 4.2: |     |  X  |
+// 4.3: |     |  X  |
+// 4.4: |     |  X  |
+// 5.1: |  X  |     |
+// 5.2: |  X  |     |
+// 5.3: |     |  X  |
+//      -------------
+
+/* sort the array */
+function bubbleSort(arr: integer[], size: integer) => void // 2.1, 2.2
+{
+  localvar n    : integer;                                 // 1.1
+  localvar i    : integer;                                 // 1.1
+  localvar j    : integer;                                 // 1.1
+  localvar temp : integer;                                 // 1.1
+  n = size;                                                // 3.1
+  i = 0;                                                   // 3.1  
+  j = 0;                                                   // 3.1
+  temp = 0;                                                // 3.1
+  while (i < n-1){                                         // 3.3, 5.1
+    j = 0;                                                 // 3.1
+    while (j < n-i-1){                                     // 3.3
+      if (arr[j] > arr[j+1])                               // 3.2, 4.1, 5.1, 5.2
+        then {
+          // swap temp and arr[i]
+          temp = arr[j];                                   // 3.1, 4.1, 5.2
+          arr[j] = arr[j+1];                               // 3.1, 4.1, 5.2
+          arr[j+1] = temp;                                 // 3.1, 4.1, 5.2
+        } else ;
+          j = j+1;                                         // 3.1, 5.1
+      };
+      i = i+1;                                             // 3.1, 5.1
+  };
+}
+   
+/* print the array */
+function printArray(arr: integer[], size: integer) => void // 2.1, 2.2
+{
+  localvar n: integer;                                     // 1.1
+  localvar i: integer;                                     // 1.1
+  n = size;                                                // 3.1
+  i = 0;                                                   // 3.1
+  while (i<n){                                             // 3.3, 5.1
+    write(arr[i]);                                         // 3.4, 4.1, 5.2
+    i = i+1;                                               // 3.1, 5.1
+  };
+} 
+
+// main funtion to test above
+function main() => void
+{
+  localvar arr: integer[7];                                // 1.1
+  arr[0] = 64;                                             // 3.1 
+  arr[1] = 34;                                             // 3.1
+  arr[2] = 25;                                             // 3.1
+  arr[3] = 12;                                             // 3.1
+  arr[4] = 22;                                             // 3.1
+  arr[5] = 11;                                             // 3.1
+  arr[6] = 90;                                             // 3.1
+  printArray(arr, 7);                                      // 2.1, 2.2
+  /* assumes that the array is passed as a reference */
+  bubbleSort(arr, 7);                                      // 2.1, 2.2 
+  printArray(arr, 7);                                      // 2.1, 2.2
+}

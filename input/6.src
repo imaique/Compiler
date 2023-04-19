@@ -2,15 +2,19 @@
 class POLYNOMIAL {
 	public function evaluate: (x: float) => float;
 	public function evaluate2: (x: float) => float;                       // 6.2
+  public attribute shadow: integer;                     // 8.6
 };
 class POLYNOMIAL {                                                      // 8.1
 	public function evaluate: (x: float) => float;                        
   public function evaluate: (x: integer) => integer;                    // 9.2
+  public attribute shadow: integer;                     // 8.6
 };
 class LINEAR isa POLYNOMIAL {
 	private attribute a: float;
 	private attribute b: float;
 	private attribute b: integer;                                       // 8.3
+
+  public attribute shadow: integer;                     // 8.6
 	
 	public constructor: (A: float, B: float);
 	public function evaluate: (x: float) => float;                      // 9.3
@@ -31,10 +35,13 @@ class C isa E {
 
 class D isa C {
 	private attribute b: integer; 
+  private attribute circular: E;      // 14.1
+
 };
 
 class E isa D {                                                         // 14.1
 	private attribute c: integer; 
+  private attribute circular: D;      // 14.1
 };
 
 
@@ -88,6 +95,11 @@ function QUADRATIC::build2(A: float, B: float, C: float) => QUADRATIC      // 6.
     new_function.a = A;
     new_function.b = B;
     new_function.c = C;
+
+    localvar a: integer; // 8.7
+
+    undeclared = 1;                 // 11.2
+
     return (new_function);
   }
   
@@ -111,6 +123,12 @@ function main() => void
   localvar j: integer[1][2][3];
   f1 = f1.build(2, 3.5);
   f2 = f2.build(-2.0, 1.0, 0.0);
+
+  undeclared = 1;                 // 11.2
+
+  f2.a; // 8.5
+
+
   c.b = 1;                                                                 // 11.2
   counter = c.f();                                                         // 11.3
   undefined();                                                             // 11.4
@@ -130,37 +148,3 @@ function main() => void
   };
 }
 
-/*
-1.   |X| Global symbol table 
-2.   |X| Class symbol table
-3.1  |X| Class data member
-3.2  |X| Function's local variable
-4.1  |X| Free function
-4.2  |X| Member function
-6.1  |X| Undeclared member function definition
-6.2  |X| Undefined member function declaration
-8.1  |X| Multiply declared class
-8.2  |X| Multiply defined free function
-8.3  |X| Multiply declared identifier in class
-8.4  |X| Multiply declared identifier in function
-8.5  |X| Shadowed inherited data member
-9.1  |X| Overloaded free function
-9.2  |X| Overloaded member function
-9.3  |X| Overridden inherited member function
-10.1 |X| Type error in expression
-10.2 |X| Type error in assignment statement 
-10.3 |X| Type error in return statement
-11.1 |X| Undeclared local variable
-11.2 |X| Undeclared data member
-11.3 |X| Undeclared member function
-11.4 |X| Undeclared free function
-11.5 |X| Undeclared class
-12.1 |X| function call with wrong number of parameters
-12.2 |X| function call with wrong type of parameters
-13.1 |X| Use of array with wrong number of dimensions
-13.2 |X| Array index is not an integer
-13.3 |X| Array parameter using wrong number of dimensions
-14.1 |X| Circular class dependency
-15.1 |X| "." operator used on non-class type
-15.2 |X| incorrect use of "self" 
-*/

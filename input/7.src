@@ -1,0 +1,225 @@
+
+function main() => void
+{
+  localvar a: POLYNOMIAL[3];
+  a[0].x.z = 3;
+  write(a[0].x.z);
+
+  localvar input: integer;
+  read(input);
+
+  localvar b: POLYNOMIAL(input);
+  write(b.b);
+}
+
+class POLYNOMIAL {
+  public  constructor: (x: integer);
+  public attribute a: integer;
+  public attribute b: integer;
+  public attribute x: XD;
+  public attribute f: float;
+};
+
+function POLYNOMIAL::constructor(x: integer)
+{
+  b = x;
+}
+
+class XD {
+  public attribute z: integer;
+};
+
+
+/*
+
+function main() => void
+{
+  localvar a: POLYNOMIAL(234);
+  //localvar b: POLYNOMIAL;
+  write(a.b);
+}
+
+class POLYNOMIAL {
+  public  constructor: (x: integer);
+  public attribute a: integer;
+  public attribute b: integer;
+};
+
+function POLYNOMIAL::constructor(x: integer)
+{
+  b = x;
+  write(self.b);
+  write(b);
+}
+
+==
+
+function main() => void
+{
+  localvar i: integer;
+  i = 3;
+  while(i > 0) {
+    write(i);
+    i = i - 1;
+  };
+}
+===
+function main() => void
+{
+  write(get().b);
+}
+
+function get() => POLYNOMIAL
+{
+  localvar x: POLYNOMIAL;
+  x.b = 222;
+  return(x);
+}
+
+class POLYNOMIAL {
+  private attribute a: integer;
+  private attribute b: integer;
+};
+
+
+===
+
+function main() => void
+{
+  localvar a: POLYNOMIAL;
+  a.a = 1;
+  a.b = 2;
+  a.evaluate(3);
+}
+
+class POLYNOMIAL {
+  public function evaluate: (x: integer) => void;
+  private attribute a: integer;
+  private attribute b: integer;
+};
+
+function POLYNOMIAL::evaluate(x: integer) => void
+{
+  write(x);
+  if(x > 0) then self.evaluate(x - 1); else {};
+}
+
+===
+
+function main() => void
+{
+  localvar a: POLYNOMIAL;
+  a.evaluate(3);
+}
+
+class POLYNOMIAL {
+  public function evaluate: (x: integer) => void;
+};
+
+function POLYNOMIAL::evaluate(x: integer) => void
+{
+  if(x > 0) then {
+    write(x);
+    evaluate(x - 1);
+  } else {
+    write(23);
+  };
+  //return (1);
+}
+
+===
+
+function main() => void
+{
+  localvar a: POLYNOMIAL;
+  a.evaluate(3);
+}
+
+class POLYNOMIAL {
+  public function evaluate: (x: integer) => void;
+};
+
+function POLYNOMIAL::evaluate(x: integer) => void
+{
+  if(x > 0) then {
+    write(x);
+    evaluate(x - 1);
+  } else {
+    write(23);
+  };
+  //return (1);
+}
+
+===
+
+function main() => void
+{
+  localvar a: integer[3][4][5];
+  a[1][1][1] = 1;
+  a[1][2][1] = 96;
+  a[1][2][2] = 12;
+  print(a);
+  write(a[1][1][1]);
+}
+
+function print(x: integer[][4][5]) => void
+{
+  write(x[1][1][1]);
+  write(x[1][2][1]);
+  write(x[1][2][2]);
+  x[1][1][1] = 33;
+}
+
+===
+
+
+function main() => void
+{
+  localvar a: A;
+  manipulate(a);
+}
+
+function manipulate(x: A) => void {
+  x.b[1] = 4;
+  x.c.age = 23;
+  write(x.b[1]);
+  write(x.c.age);
+}
+
+class A {
+  public attribute b: integer[3];
+  public attribute c: B;
+};
+
+class B {
+  public attribute age: integer;
+};
+
+
+===
+
+function main() => void
+{
+  localvar a: integer[3][4][5];
+  a[1][1][1] = 1;
+  a[1][2][1] = 96;
+  a[1][2][2] = 12;
+  write(a[1][1][1]);
+  write(a[1][2][1]);
+  write(a[1][2][2]);
+}
+function main() => void
+{
+  localvar a: A;
+  a.b = 1;
+  a.c = a.b + a.b;
+  write(a.c);
+}
+
+function main() => void
+{
+  localvar a: A;
+  a.b = 1;
+  write(a.b);
+} 
+*/
