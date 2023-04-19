@@ -513,7 +513,7 @@ bool Parser::parse() {
 	Token current_token = get_next_token();
 	Token previous_token = current_token;
 
-	while (stack.top() != "$") { //&& current_token.token_type != Token::Type::EndOfFile) {
+	while (stack.top() != "$" && current_token.token_type != Token::Type::EndOfFile) {
 		string top = stack.top();
 
 		string current_token_string_type = Token::get_string(current_token.token_type);
@@ -552,7 +552,7 @@ bool Parser::parse() {
 
 	
 
-	bool fail = current_token.token_type != T::EndOfFile || error;
+	bool fail = !(current_token.token_type == T::EndOfFile) || error;
 	if(fail) std::cout << "Syntax error(s) detected during parsing." << std::endl;
 	std::cout << "Parsing (Syntax Analysis) completed." << std::endl;
 
@@ -631,16 +631,16 @@ void Parser::print_errors(const Token& current_token) {
 
 void Parser::skip_errors(Token& current_token) {
 	print_errors(current_token);
+	current_token = get_next_token();
 
 	T token_type = current_token.token_type;
 	if (Token::is_token_type(top()) || token_type == T::EndOfFile || in_follow(top(), token_type)) {
 		pop();
 	}
 	else {
-		while (la.has_next_token() && !(in_first(top(), current_token.token_type) || (is_nullable(top()) && in_follow(top(), current_token.token_type))))
+		while (current_token.token_type != T::EndOfFile && la.has_next_token() && !(in_first(top(), current_token.token_type) || (is_nullable(top()) && in_follow(top(), current_token.token_type))))
 			current_token = get_next_token();
 	}
-	token_type;
 }
 
 bool Parser::in_first(string s, T token_type) {
