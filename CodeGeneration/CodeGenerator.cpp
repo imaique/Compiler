@@ -1,7 +1,7 @@
 #include "CodeGenerator.h"
 #include "../Semantic/ASTGenerator.h"
 #include "../Utils/utils.h"
-
+#include <exception>
 
 using namespace std;
 typedef SymbolTableEntry::Kind EntryKind;
@@ -23,11 +23,15 @@ void CodeGenerator::generate() {
 }
 
 void CodeGenerator::generate_code() {
-	generate_code(root, nullptr, nullptr, nullptr);
-
-	write_instruction("ent", "db \"Enter input: \", 0");
-	write_instruction("nl", "db 13, 10, 0");
-	write_instruction("buf", "res 20");
+	try {
+		generate_code(root, nullptr, nullptr, nullptr);
+		write_instruction("ent", "db \"Enter input: \", 0");
+		write_instruction("nl", "db 13, 10, 0");
+		write_instruction("buf", "res 20");
+	}
+	catch (...) {
+		cout << "Error occured during code generation." << endl;
+	}
 }
 
 void CodeGenerator::get_memory_blocks() {
@@ -104,7 +108,7 @@ string CodeGenerator::get_branch() {
 	return "b" + to_string(branch_count++);
 }
 
-SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry* function_scope, const SymbolTable* class_table, SymbolTableEntry* dot_entry) {
+SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry* function_scope, const SymbolTable* class_table, SymbolTableEntry* dot_entry) throw(...) {
 	const string& node_type = node->type;
 	const vector<AST*>& children = node->children;
 	SymbolTableEntry* node_entry = node->entry;
@@ -223,6 +227,7 @@ SymbolTableEntry* CodeGenerator::generate_code(AST* node, const SymbolTableEntry
 
 			write_empty_line();
 			write_comment("store return value into return register");
+			if (!return_value_entry) throw std::exception("compiler exception");
 			if (return_value_entry->is_reference) {
 				load_word(return_value_entry, r);
 				store_word(return_entry->get_offset(), r);
