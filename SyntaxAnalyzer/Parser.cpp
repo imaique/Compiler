@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include "../Semantic/ASTGenerator.h"
+#include "../Compiler/Compiler.h"
 
 #include <sstream>
 
@@ -549,12 +550,14 @@ bool Parser::parse() {
     derivation_file.close();
     error_file.close();
 
-	if (current_token.token_type != T::EndOfFile || error) {
-		return false;
-	}
-	else {
-		return true;
-	}
+	
+
+	bool fail = current_token.token_type != T::EndOfFile || error;
+	if(fail) std::cout << "Syntax error(s) detected during parsing." << std::endl;
+	std::cout << "Parsing (Syntax Analysis) completed." << std::endl;
+
+	return !fail;
+
 }
 
 Token Parser::get_next_token() {
@@ -620,16 +623,13 @@ void Parser::print_errors(const Token& current_token) {
 	}
 
 	ss << ". Received " << Token::get_string(current_token.token_type) << " instead on line " 
-		<< current_token.line_location << ", character index " << current_token.index_start << "." << std::endl;
+		<< current_token.line_location << ", character index " << current_token.index_start << ".";
 
-	error_file << ss.str();
+	Compiler::add_error(CompilerError(ss.str(), current_token.line_location));
+	error_file << std::endl << ss.str();
 }
 
 void Parser::skip_errors(Token& current_token) {
-
-	//std::cout << "syntax error at " << current_token.line_location << " from " << current_token.lexeme << std::endl;
-	//error_file << "syntax error at " << current_token.line_location << " from a " << Token::get_string(current_token.token_type) << " (\"" << current_token.lexeme << "\")" << std::endl;
-
 	print_errors(current_token);
 
 	T token_type = current_token.token_type;
