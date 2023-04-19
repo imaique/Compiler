@@ -429,11 +429,12 @@ void SemanticAnalyzer::check_function_names(SymbolTable* global_table) {
 				add_error("6.2 Function " + scope + function_name +  " is declared but never defined", entry->line_location);
 			}
 		}
+		bool main = false;
 
 		for (const auto& pair : functions) {
 			const vector<string>& func_id_list = pair.second;
 			const string function_name = pair.first;
-
+			if (function_name == "main" && table->name == "global") main = true;
 			if (func_id_list.size() > 1) {
 				
 				std::stringstream ss;
@@ -452,6 +453,8 @@ void SemanticAnalyzer::check_function_names(SymbolTable* global_table) {
 				}
 			}
 		}
+
+		if(!main) add_error("15.2 Missing main function.", -1);
 	}
 
 
@@ -820,7 +823,7 @@ SymbolTable* SemanticAnalyzer::construct_symbol_tables(AST* root) {
 		}
 	}
 
-	if (!main_func) add_error("15.2 Missing main function.", -1);
+	//if (!main_func) add_error("15.2 Missing main function.", -1);
 
 	unordered_set<SymbolTableClassEntry*> augmented_classes;
 	for (SymbolTableClassEntry* class_entry : class_entries) {

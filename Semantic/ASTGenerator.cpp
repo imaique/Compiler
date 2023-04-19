@@ -133,7 +133,6 @@ bool ASTGenerator::perform_semantic_action(std::string action, const Token& toke
 
 		new_node = new AST(type, children);
 		m_stack.push(new_node);
-		dot_writer::write_ast(new_node, "test");
 	}
 
 	
