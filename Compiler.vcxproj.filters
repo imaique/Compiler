@@ -30,9 +30,6 @@
     <ClCompile Include="Semantic\ASTGenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Semantic\SemanticAnalyzer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Semantic\AST.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -55,6 +52,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Compiler\CompilerError.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Semantic\SemanticAnalyzer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
