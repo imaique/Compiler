@@ -68,6 +68,7 @@ AST* ASTGenerator::get_AST() {
 	AST* root = m_stack.top();
 	transform_tree(root);
 	m_stack.pop();
+	std::cout << "AST generated." << std::endl;
 	return root;
 }
 
@@ -118,8 +119,6 @@ bool ASTGenerator::perform_semantic_action(std::string action, const Token& toke
 			children.push_back(m_stack.top());
 			m_stack.pop();
 		}
-
-		if (any && m_stack.empty()) std::cout << "not a good amount of children for " << type << std::endl;
 
 		if (any && !m_stack.empty() && !m_stack.top()) m_stack.pop();
 
