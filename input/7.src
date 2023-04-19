@@ -1,6 +1,5 @@
 
 function main() => void
-
 {
   localvar a: POLYNOMIAL[3];
   a[0].x.z = 3;
