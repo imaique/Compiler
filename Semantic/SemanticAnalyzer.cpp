@@ -102,6 +102,11 @@ SymbolType SemanticAnalyzer::resolve_type(AST* node, const SymbolTableEntry* fun
 			return SymbolType::INVALID;
 		}
 
+		// if data member
+		if (function_entry && class_table) {
+			add_warning("Local variable " + variable_name + " in member function " + function_entry->name +  " shadows data member of " + class_table->name + " with the same name.", node->line_start);
+		}
+
 		const AST* dim_list = get_type(children, DimList);
 
 		const AST* param_list = get_type(children, AParamList);
