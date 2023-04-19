@@ -17,6 +17,8 @@ void CodeGenerator::generate() {
 
 	generate_code();
 	moon_file.close();
+
+	std::cout << "Code generation complete." << std::endl;
 	return;
 }
 
@@ -66,7 +68,6 @@ void CodeGenerator::generate_temporary_function_variables(AST* node, int& scope_
 		if(node_type == FuncCall) size = get_size(node->decorator.get_type());
 		string name = "t" + to_string(temp_count++);
 		string unique_id = '_' + name;
-		cout << name << " " << unique_id << endl;
 		EntryKind kind = EntryKind::TempVar;
 		SymbolType* type = new SymbolType(node->decorator.get_type());
 		SymbolTableEntry* temporary_variable_entry = new SymbolTableEntry(unique_id, name, kind, type, -1, SymbolTableEntry::Visibility::None, nullptr, node, scope_size);
@@ -812,7 +813,6 @@ int CodeGenerator::get_memory(SymbolTableEntry* entry, SymbolType* class_type) {
 		get_children_sizes(current_table->entries, scope_size, class_entry->type);
 		get_children_sizes(class_entry->inherited_members, scope_size);
 
-		cout << entry->name << " " << scope_size << endl;
 		entry->m_size = scope_size;
 		current_table->scope_size = scope_size;
 		return scope_size;
