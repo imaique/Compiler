@@ -126,7 +126,7 @@ function main() => void
 
   undeclared = 1;                 // 11.2
 
-  f2.a; // 8.5
+  f2.a = 1; // 8.5
 
 
   c.b = 1;                                                                 // 11.2
