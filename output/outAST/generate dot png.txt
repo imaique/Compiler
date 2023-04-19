@@ -2,3 +2,4 @@ dot -Tpng example-bubblesort.dot.outast -o example-bubblesort.png
 dot -Tpng example-polynomial.dot.outast -o example-polynomial.png
 dot -Tpng syntax-func.dot.outast -o syntax-func.png
 dot -Tpng full-coverage.dot.outast -o full-coverage.png
+dot -Tpng 7-bubble.dot.outast -o 7-bubble.png
