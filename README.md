@@ -1,9 +1,9 @@
 # Compiler
-Compiler project for Concordia's COMP 445 - Compiler Design class
+Compiler project for Concordia's COMP 445 - Compiler Design class.
 
-Compiler for the programming language defined by this EBNF grammar implmented in C++
+Compiler for the programming language defined by this EBNF grammar implmented in C++.
 
-It supports
+It supports:
 - Complex integer expressions
 - Functions
 - Objects
