@@ -1,35 +1,21 @@
 
 function main() => void
 {
-  localvar a: POLYNOMIAL[3];
-  a[0].x.z = 3;
-  write(a[0].x.z);
-
   localvar input: integer;
   read(input);
-
-  localvar b: POLYNOMIAL(input);
-  write(b.b);
+  localvar a: A(input);
+  write(a.b);
 }
 
-class POLYNOMIAL {
-  public  constructor: (x: integer);
-  public attribute a: integer;
-  public attribute b: integer;
-  public attribute x: XD;
-  public attribute f: float;
-};
-
-function POLYNOMIAL::constructor(x: integer)
-{
-  b = x;
+class A {
+   public constructor: (x: integer);
+   public attribute b: integer;
 }
 
-class XD {
-  public attribute z: integer;
-};
 
-
+function A::constructor(x: integer) {
+  self.b = x;
+}
 /*
 
 function main() => void
