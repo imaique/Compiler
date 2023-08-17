@@ -9,7 +9,8 @@ It supports:
 - Objects
 - Statements (Assignment, Conditional, Loop, Input, Output)
 - Aggregate data elements access
+- Partial Inheritance
 
 To be added:
 - Floating point arithmetic
-- Inheritance
+- Complete Inheritance
